@@ -293,7 +293,7 @@ export default function ParticleSwarm() {
   return (
     <div
       ref={mountRef}
-      className="fixed inset-0 z-0 pointer-events-none"
+      className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
     />
   );
 }

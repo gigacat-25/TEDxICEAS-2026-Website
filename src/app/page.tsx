@@ -41,161 +41,166 @@ const schedule = [
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-transparent overflow-hidden">
+    <div className="relative min-h-screen bg-charcoal text-[#f0f0f0]">
+      {/* Background Particles Layer */}
       <ParticleSwarm />
+
+      {/* Navigation */}
       <Navbar />
 
-      <main className="relative z-10 font-sans selection:bg-[#E62B1E] selection:text-white">
+      {/* Content Layer */}
+      <main className="relative z-10">
 
-        {/* ── HERO ── Shape: Sphere */}
-        <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center px-6 md:px-20 relative">
-          <p className="text-xs md:text-sm uppercase tracking-[0.3em] text-[#E62B1E] mb-6 font-medium">
-            x = independently organized TED event
-          </p>
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none mb-4 uppercase">
-            TEDx<span className="text-[#E62B1E]">ICEAS</span>
-          </h1>
-          <p className="text-2xl md:text-4xl font-light tracking-wide text-white/70 mb-3">
-            What Shapes Us
-          </p>
-          <p className="text-sm md:text-base text-white/40 mb-10 uppercase tracking-widest">
-            2026 · Bengaluru, India
-          </p>
-          <a
-            href="#register"
-            className="inline-block bg-[#E62B1E] border border-[#E62B1E] hover:bg-white hover:border-white hover:text-[#E62B1E] text-white font-bold text-sm px-10 py-4 uppercase tracking-[0.2em] transition-all duration-300"
-          >
-            Get Tickets
-          </a>
-        </section>
-
-        {/* ── ABOUT ── Shape: Triangle */}
-        <section id="about" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-32 relative">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#E62B1E] mb-4">What is TEDx?</p>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-8">
-              The <br /><span className="text-[#E62B1E]">Theme</span>
-            </h2>
-            <p className="text-lg md:text-xl leading-relaxed text-white/60 mb-6">
-              In the spirit of discovering and spreading ideas, TED has created a program called TEDx — a series of local, self-organized events that bring people together to share a TED-like experience.
+        {/* ── HERO SECTION ── */}
+        <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none">
+          <div className="space-y-4 animate-in fade-in duration-1000 slide-in-from-bottom-8">
+            <p className="text-[0.6rem] md:text-xs uppercase tracking-[0.4em] text-ted-red font-bold opacity-80">
+              x = independently organized TED event
             </p>
-            <p className="text-lg md:text-xl leading-relaxed text-white/60">
-              Our event is called <strong className="text-white">TEDxICEAS</strong>. At our event, TED Talks video and live speakers combine to spark deep discussion and connection. The TED Conference provides general guidance for the TEDx program, but individual TEDx events are self-organized.
-            </p>
-          </div>
-        </section>
-
-        {/* ── SPEAKERS ── Shape: Square */}
-        <section id="speakers" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-32 relative">
-          <p className="text-xs uppercase tracking-[0.3em] text-[#E62B1E] mb-4">Our Lineup</p>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-12">
-            Speakers
-          </h2>
-          <p className="text-sm md:text-base text-white/40 mb-10 max-w-xl">
-            TEDxICEAS brings together thinkers, innovators, and changemakers. Each speaker was carefully selected for their unique perspective and ability to inspire.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {speakers.map((speaker, i) => (
-              <div
-                key={i}
-                className="group bg-white/5 hover:bg-[#E62B1E]/10 p-6 transition-all duration-300 border border-white/10 hover:border-[#E62B1E]/30 rounded-lg backdrop-blur-sm"
-              >
-                <div className="text-3xl font-black text-white/10 group-hover:text-[#E62B1E]/40 transition-colors mb-4">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <p className="text-white font-bold text-lg leading-tight mb-2">{speaker.name}</p>
-                <p className="text-white/50 text-sm leading-relaxed">{speaker.role}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── SCHEDULE ── Shape: Star */}
-        <section id="schedule" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-32 relative py-20">
-          <p className="text-xs uppercase tracking-[0.3em] text-[#E62B1E] mb-4">April 17th, 2025</p>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-12">
-            Schedule
-          </h2>
-          <div className="max-w-3xl flex flex-col gap-6">
-            {schedule.map((item, i) => (
-              <div
-                key={i}
-                className="group flex flex-col md:flex-row md:items-center gap-2 md:gap-10 p-4 border-l-2 border-white/10 hover:border-[#E62B1E] bg-white/[0.02] hover:bg-white/[0.04] transition-all"
-              >
-                <span className="text-sm text-[#E62B1E] md:w-32 shrink-0 font-medium tracking-wide">{item.time}</span>
-                <span className="text-lg md:text-xl text-white/80 group-hover:text-white transition-colors">{item.event}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── VENUE + REGISTER ── Shape: Hexagon */}
-        <section id="register" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-32 relative">
-          <div className="grid md:grid-cols-2 gap-20 bg-black/40 p-10 md:p-16 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[#E62B1E] mb-4">Location</p>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight mb-6">
-                Venue
+            <h1 className="text-7xl md:text-9xl lg:text-[11rem] font-black tracking-[-0.06em] leading-[0.8] uppercase flex flex-col">
+              <span>TED<span className="text-ted-red">x</span></span>
+              <span className="text-white">ICEAS</span>
+            </h1>
+            <div className="pt-8 space-y-2">
+              <h2 className="text-2xl md:text-4xl font-light tracking-wide text-white/60">
+                What <span className="text-white font-medium italic">Shapes</span> Us
               </h2>
-              <p className="text-white font-semibold text-xl mb-4">
-                Impact College of Engineering and Applied Sciences
-              </p>
-              <p className="text-white/60 text-base leading-relaxed mb-6">
-                Kodigehalli, 60 Feet Road, Sahakar Nagar,<br />
-                Koti Hosahalli, Bengaluru, Karnataka 560092
-              </p>
-              <p className="text-white/40 text-sm">
-                A green campus at the heart of Bengaluru — the Silicon Capital of India.
+              <p className="text-[0.7rem] uppercase tracking-[0.3em] text-white/30">
+                April 17th, 2026 · Bengaluru, India
               </p>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[#E62B1E] mb-4">Register</p>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight mb-6">
-                Join Us
-              </h2>
-              <p className="text-white/60 text-base leading-relaxed mb-10">
-                Be part of a transformative experience. Secure your seat for TEDxICEAS 2026 and be among the thinkers, creators, and changemakers shaping tomorrow.
-              </p>
+            <div className="pt-10">
               <a
-                href="#"
-                className="inline-block border border-[#E62B1E] text-[#E62B1E] hover:bg-[#E62B1E] hover:text-white font-bold text-sm px-10 py-4 uppercase tracking-[0.2em] transition-all duration-300"
+                href="#register"
+                className="group relative inline-flex items-center justify-center px-12 py-5 overflow-hidden font-bold transition-all bg-ted-red hover:bg-white"
               >
-                Get Tickets
+                <span className="relative text-white group-hover:text-ted-red uppercase tracking-widest text-xs transition-colors duration-300">Get Tickets</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Scroll cue */}
+          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20">
+            <div className="w-[1px] h-16 bg-white animate-pulse" />
+          </div>
+        </section>
+
+        {/* ── THEME SECTION ── */}
+        <section id="about" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-40 py-32 bg-gradient-to-b from-transparent via-charcoal/40 to-transparent">
+          <div className="max-w-4xl space-y-12">
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">The Concept</p>
+            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">
+              Every curve, <br className="hidden md:block" /> every <span className="text-ted-red italic">void</span>.
+            </h2>
+            <div className="grid md:grid-cols-2 gap-12 pt-8">
+              <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
+                In the spirit of discovering and spreading ideas, TED has created TEDx — local, self-organized events that bring people together to share a TED-like experience.
+              </p>
+              <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
+                At <strong className="text-white font-medium">TEDxICEAS</strong>, live speakers and TED Talks videos combine to spark deep discussion. Our 2026 theme explores the forces, stories, and ideas that define our identity.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SPEAKERS SECTION ── */}
+        <section id="speakers" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 border-t border-white/5">
+          <header className="mb-20 space-y-6">
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Global Perspectives</p>
+            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white">The Lineup</h2>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-px gap-y-px bg-white/10 border border-white/10 rounded-sm overflow-hidden">
+            {speakers.map((s, i) => (
+              <div key={i} className="group relative aspect-square bg-charcoal p-10 flex flex-col justify-between hover:bg-ted-red transition-all duration-700">
+                <span className="text-5xl font-black text-white/5 group-hover:text-white/10 transition-colors uppercase select-none tracking-tighter">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 className="text-white font-bold text-xl md:text-2xl leading-none mb-3 group-hover:translate-x-2 transition-transform duration-500">{s.name}</h3>
+                  <p className="text-white/40 text-xs uppercase tracking-widest font-medium group-hover:text-white/70 transition-colors duration-500">{s.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── SCHEDULE SECTION ── */}
+        <section id="schedule" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-white/[0.01]">
+          <div className="max-w-5xl">
+            <header className="mb-24 space-y-6 text-center md:text-left">
+              <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Program</p>
+              <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase italic">Timeline</h2>
+            </header>
+
+            <div className="divide-y divide-white/5">
+              {schedule.map((item, i) => (
+                <div key={i} className="group py-12 flex flex-col md:flex-row md:items-baseline gap-6 md:gap-16 hover:bg-white/[0.02] transition-colors relative overflow-hidden px-4">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-ted-red scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-500" />
+                  <span className="text-sm font-mono text-ted-red/60 uppercase tracking-tighter shrink-0 md:w-32">{item.time}</span>
+                  <span className="text-3xl md:text-5xl font-bold tracking-tighter text-white/80 group-hover:text-white group-hover:translate-x-4 transition-all duration-500 leading-none">
+                    {item.event}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── VENUE & REGISTRATION ── */}
+        <section id="register" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 flex flex-col justify-center">
+          <div className="grid lg:grid-cols-2 gap-20 items-end">
+            <div className="space-y-10">
+              <div className="space-y-4">
+                <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Location</p>
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none">THE <br /> VENUE</h2>
+              </div>
+              <div className="space-y-6 text-white/50 text-xl font-light leading-relaxed">
+                <p>
+                  <span className="text-white font-bold block mb-2 text-2xl uppercase tracking-tighter italic">Impact College of Engineering</span>
+                  Sahakar Nagar, Bengaluru, Karnataka 560092
+                </p>
+                <p className="text-base text-white/30 max-w-sm tracking-wide">
+                  Join us at our tech-forward campus for an immersive day of cinematic talks and groundbreaking innovation.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-ted-red p-12 md:p-20 rounded-sm space-y-10 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <span className="text-9xl font-black tracking-tighter">TEDx</span>
+              </div>
+              <div className="space-y-6 relative z-10">
+                <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none">SECURE YOUR SEAT.</h3>
+                <p className="text-white/80 text-lg leading-relaxed font-medium">Limited spots available for the 2026 flagship event. Experience the viral energy live.</p>
+              </div>
+              <a href="#" className="relative z-10 flex items-center justify-between group bg-white px-10 py-6 text-ted-red font-black uppercase tracking-widest text-sm hover:translate-x-4 transition-all duration-300">
+                Register Now
+                <span className="group-hover:translate-x-2 transition-transform">→</span>
               </a>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="relative z-10 border-t border-white/5 px-6 md:px-20 py-12 bg-black/50 backdrop-blur-lg">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div>
-            <p className="text-white font-black text-xl tracking-tighter uppercase">
-              TEDx<span className="text-[#E62B1E]">ICEAS</span>
-            </p>
-            <p className="text-white/30 text-xs mt-2">
+      <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-charcoal border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+          <div className="space-y-4">
+            <h3 className="font-black text-3xl tracking-tighter uppercase leading-none">
+              TEDx<span className="text-ted-red">ICEAS</span>
+            </h3>
+            <p className="text-white/20 text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
               This independent TEDx event is operated under license from TED.
             </p>
           </div>
-          <nav className="flex flex-wrap gap-6">
-            {[
-              { label: "Home", href: "#hero" },
-              { label: "About", href: "#about" },
-              { label: "Speakers", href: "#speakers" },
-              { label: "Schedule", href: "#schedule" },
-              { label: "Venue", href: "#register" },
-              { label: "Tickets", href: "#register" },
-            ].map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors"
-              >
-                {link.label}
-              </a>
+          <div className="flex flex-wrap gap-x-20 gap-y-8">
+            {['Facebook', 'Instagram', 'LinkedIn', 'Twitter'].map(s => (
+              <a key={s} href="#" className="text-[0.65rem] uppercase tracking-widest font-bold text-white/40 hover:text-white transition-colors">{s}</a>
             ))}
-          </nav>
-          <p className="text-white/20 text-xs">© 2026 TEDxICEAS. All rights reserved.</p>
+          </div>
+          <div className="text-right">
+            <p className="text-white/10 text-[0.6rem] uppercase tracking-[0.4em]">&copy; 2026 All Rights Reserved</p>
+          </div>
         </div>
       </footer>
     </div>
