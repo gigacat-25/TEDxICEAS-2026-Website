@@ -2,16 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-
-/**
- * THEME: WHAT SHAPES US
- * Reverted to single powerful organic focal structure.
- * Multi-shape nodes: Squares, Triangles, and Diamonds.
- * Dark Cinematic Red.
- */
 
 export default function ParticleSwarm() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -20,42 +10,99 @@ export default function ParticleSwarm() {
   useEffect(() => {
     if (!mountRef.current) return;
 
-    const COUNT = 29791; // 31^3 for a perfect cube grid
+    // --- DEVICE DETECTION & CONFIG ---
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Reduce count on mobile for better performance
+    const COUNT = isMobile ? 15625 : 29791; // 25^3 vs 31^3
     const numMajorShapes = 5;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2500);
-    camera.position.z = 200;
+    camera.position.z = 220;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    // Post-processing removed as requested
-
-    // --- GEOMETRY ---
+    // --- GEOMETRY & ATTRIBUTES ---
     const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(COUNT * 3);
-    const colors = new Float32Array(COUNT * 3);
+    
+    // We will store the shapes as attributes and morph them in the shader
+    const basePositions = new Float32Array(COUNT * 3);
+    const scatterPositions = new Float32Array(COUNT * 3);
+    const randoms = new Float32Array(COUNT);
 
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("customColor", new THREE.BufferAttribute(colors, 3));
+    const s = Math.ceil(Math.pow(COUNT, 1/3));
+    const sep = 5.0;
+    const off = (s * sep) / 2;
+
+    for (let i = 0; i < COUNT; i++) {
+      const i3 = i * 3;
+      const z = Math.floor(i / (s * s));
+      const y = Math.floor((i % (s * s)) / s);
+      const x = i % s;
+      
+      // Grid
+      basePositions[i3] = x * sep - off;
+      basePositions[i3 + 1] = y * sep - off;
+      basePositions[i3 + 2] = z * sep - off;
+
+      // Scatter (Pre-calculate a single scatter target to keep it GPU-side)
+      const range = 250;
+      scatterPositions[i3] = basePositions[i3] + (Math.random() - 0.5) * range;
+      scatterPositions[i3 + 1] = basePositions[i3 + 1] + (Math.random() - 0.5) * range;
+      scatterPositions[i3 + 2] = basePositions[i3 + 2] + (Math.random() - 0.5) * range;
+
+      randoms[i] = Math.random();
+    }
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(basePositions, 3));
+    geometry.setAttribute("aTarget", new THREE.BufferAttribute(scatterPositions, 3));
+    geometry.setAttribute("aRandom", new THREE.BufferAttribute(randoms, 1));
 
     // --- SHADER MATERIAL ---
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uPointSize: { value: 1.8 * (typeof window !== "undefined" ? window.devicePixelRatio : 1) }
+        uProgress: { value: 0 },
+        uMouse: { value: new THREE.Vector2(-999, -999) },
+        uPointSize: { value: 1.5 * (typeof window !== "undefined" ? window.devicePixelRatio : 1) },
+        uColor: { value: new THREE.Color("#E62B1E") }
       },
       vertexShader: `
+        uniform float uTime;
+        uniform float uProgress;
         uniform float uPointSize;
-        attribute vec3 customColor;
+        uniform vec2 uMouse;
+        attribute vec3 aTarget;
+        attribute float aRandom;
         varying vec3 vColor;
+        uniform vec3 uColor;
+
         void main() {
-          vColor = customColor;
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = uPointSize * (300.0 / -mvPosition.z);
+          vColor = uColor;
+          
+          // Morph between Grid and Scatter
+          vec3 pos = mix(position, aTarget, uProgress);
+
+          // Organic Waving
+          float wave = sin(uTime * 0.5 + aRandom * 10.0) * 4.0;
+          pos.x += cos(uTime * 0.3 + pos.y * 0.04) * wave;
+          pos.y += sin(uTime * 0.4 + pos.x * 0.04) * wave;
+
+          // Mouse Interaction (GPU side)
+          vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+          float dist = distance(worldPos.xy, uMouse);
+          if (dist < 60.0) {
+            vec2 dir = normalize(worldPos.xy - uMouse);
+            float force = (1.0 - dist / 60.0) * 35.0;
+            pos.xy += dir * force;
+          }
+
+          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+          gl_PointSize = uPointSize * (350.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
@@ -65,155 +112,75 @@ export default function ParticleSwarm() {
           vec2 cxy = 2.0 * gl_PointCoord - 1.0;
           float r = dot(cxy, cxy);
           if (r > 1.0) discard;
-          // Shard-like effect: slightly sharper edges
           float alpha = 1.0 - smoothstep(0.5, 1.0, r);
-          gl_FragColor = vec4(vColor, alpha * 0.8);
+          gl_FragColor = vec4(vColor, alpha * 0.85);
         }
       `,
       transparent: true,
-      depthTest: false
+      depthTest: false,
+      blending: THREE.AdditiveBlending
     });
 
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
-    // --- SHAPE GENERATION SYSTEM ---
-    const shapes: Float32Array[] = [];
-
-    function generateGrid() {
-      const arr = new Float32Array(COUNT * 3);
-      const s = Math.ceil(Math.pow(COUNT, 1/3));
-      const sep = 5.0; // Increased separation for better visibility
-      const off = (s * sep) / 2;
-      
-      for (let i = 0; i < COUNT; i++) {
-        const i3 = i * 3;
-        const z = Math.floor(i / (s * s));
-        const y = Math.floor((i % (s * s)) / s);
-        const x = i % s;
-        
-        arr[i3] = x * sep - off;
-        arr[i3 + 1] = y * sep - off;
-        arr[i3 + 2] = z * sep - off;
-      }
-      return arr;
-    }
-
-    function generateScatter(intensity: number) {
-      const arr = new Float32Array(COUNT * 3);
-      const s = Math.ceil(Math.pow(COUNT, 1/3));
-      const sep = 5.0;
-      const off = (s * sep) / 2;
-      
-      for (let i = 0; i < COUNT; i++) {
-        const i3 = i * 3;
-        const z = Math.floor(i / (s * s));
-        const y = Math.floor((i % (s * s)) / s);
-        const x = i % s;
-        
-        // Base grid position
-        const bx = x * sep - off;
-        const by = y * sep - off;
-        const bz = z * sep - off;
-        
-        // Scatter intensity increases random displacement
-        const range = 100 * intensity;
-        arr[i3] = bx + (Math.random() - 0.5) * range * 4;
-        arr[i3 + 1] = by + (Math.random() - 0.5) * range * 4;
-        arr[i3 + 2] = bz + (Math.random() - 0.5) * range * 4;
-      }
-      return arr;
-    }
-
-    // Stage 0: Perfect Grid
-    shapes.push(generateGrid());
-    // Stages 1-4: Increasingly scattered
-    shapes.push(generateScatter(0.5));
-    shapes.push(generateScatter(1.2));
-    shapes.push(generateScatter(2.0));
-    shapes.push(generateScatter(3.5));
-
-    const currentPositions = new Float32Array(COUNT * 3);
-    const targetPositions = new Float32Array(COUNT * 3);
-
     let scrollProgress = 0;
     let currentScrollY = 0;
-    const raycaster = new THREE.Raycaster();
-    const mouseWorld = new THREE.Vector3();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      // Calculate mouse in world coordinates on a plane at Z=0
+      // For simplicity in the GPU shader, we'll pass roughly projected mouse coords
+      const rect = mountRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Approximate world scale (since camera Z=220 and FOV=60)
+      const aspect = window.innerWidth / window.innerHeight;
+      const h = 2 * Math.tan((60 * Math.PI) / 360) * 220;
+      const w = h * aspect;
+      material.uniforms.uMouse.value.set(x * w * 0.5, y * h * 0.5);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = mountRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+        const aspect = window.innerWidth / window.innerHeight;
+        const h = 2 * Math.tan((60 * Math.PI) / 360) * 220;
+        const w = h * aspect;
+        material.uniforms.uMouse.value.set(x * w * 0.5, y * h * 0.5);
+      }
     };
 
     const updateScroll = () => {
       currentScrollY = window.scrollY;
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = (currentScrollY / maxScroll) * (numMajorShapes - 1);
-      scrollProgress = Math.max(0, Math.min(progress, numMajorShapes - 1));
+      const progress = currentScrollY / maxScroll;
+      material.uniforms.uProgress.value = Math.max(0, Math.min(progress * 1.5, 1.0));
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("scroll", updateScroll, { passive: true });
     updateScroll();
 
-    const clock = new THREE.Clock();
-
     function animate() {
-      const time = clock.getElapsedTime();
       requestAnimationFrame(animate);
-
+      const time = performance.now() * 0.001;
       material.uniforms.uTime.value = time;
 
-      // Subtle parallax that keeps particles in view
-      // We move the points group slightly instead of the camera to avoid frustum clipping issues
-      const scrollShift = -currentScrollY * 0.02;
+      // Parallax
+      const scrollShift = -currentScrollY * 0.015;
       points.position.y = THREE.MathUtils.lerp(points.position.y, scrollShift, 0.05);
 
-      const fromIdx = Math.floor(scrollProgress);
-      const toIdx = Math.min(fromIdx + 1, numMajorShapes - 1);
-      const lerpFactor = scrollProgress - fromIdx;
+      // Rotation
+      points.rotation.y += isMobile ? 0.0004 : 0.0008;
+      points.rotation.x = Math.sin(time * 0.2) * 0.05;
 
-      raycaster.setFromCamera(mouse.current, camera);
-      raycaster.ray.intersectPlane(plane, mouseWorld);
-
-      const posAttr = geometry.attributes.position;
-      const colAttr = geometry.attributes.customColor;
-      const tedRed = new THREE.Color("#950606");
-
-      for (let i = 0; i < COUNT; i++) {
-        const i3 = i * 3;
-        const tx = THREE.MathUtils.lerp(shapes[fromIdx][i3], shapes[toIdx][i3], lerpFactor);
-        const ty = THREE.MathUtils.lerp(shapes[fromIdx][i3 + 1], shapes[toIdx][i3 + 1], lerpFactor);
-        const tz = THREE.MathUtils.lerp(shapes[fromIdx][i3 + 2], shapes[toIdx][i3 + 2], lerpFactor);
-
-        const wave = Math.sin(time * 0.5 + i * 0.05) * 3;
-        targetPositions[i3] = tx + Math.cos(time * 0.3 + ty * 0.04) * wave;
-        targetPositions[i3 + 1] = ty + Math.sin(time * 0.4 + tx * 0.04) * wave;
-        targetPositions[i3 + 2] = tz;
-
-        const dx = targetPositions[i3] - mouseWorld.x;
-        const dy = targetPositions[i3 + 1] - mouseWorld.y;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < 3600) { // dist < 60
-          const dist = Math.sqrt(distSq);
-          const force = (1.0 - dist / 60) * 45;
-          targetPositions[i3] += (dx / dist) * force;
-          targetPositions[i3 + 1] += (dy / dist) * force;
-        }
-
-        currentPositions[i3] = THREE.MathUtils.lerp(currentPositions[i3], targetPositions[i3], 0.1);
-        currentPositions[i3 + 1] = THREE.MathUtils.lerp(currentPositions[i3 + 1], targetPositions[i3 + 1], 0.1);
-        currentPositions[i3 + 2] = THREE.MathUtils.lerp(currentPositions[i3 + 2], targetPositions[i3 + 2], 0.1);
-
-        posAttr.setXYZ(i, currentPositions[i3], currentPositions[i3 + 1], currentPositions[i3 + 2]);
-        colAttr.setXYZ(i, tedRed.r, tedRed.g, tedRed.b);
-      }
-
-      posAttr.needsUpdate = true;
-      colAttr.needsUpdate = true;
       renderer.render(scene, camera);
     }
     animate();
@@ -222,12 +189,13 @@ export default function ParticleSwarm() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      material.uniforms.uPointSize.value = 1.8 * window.devicePixelRatio;
+      material.uniforms.uPointSize.value = 1.5 * window.devicePixelRatio;
     };
     window.addEventListener("resize", resize);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("scroll", updateScroll);
       window.removeEventListener("resize", resize);
       if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
