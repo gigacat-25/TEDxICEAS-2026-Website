@@ -21,16 +21,20 @@ export default function Navbar() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${scrolled
-                    ? "py-4 bg-charcoal/80 backdrop-blur-xl border-white/5"
-                    : "py-8 bg-transparent border-transparent"
+                ? "py-4 bg-charcoal/80 backdrop-blur-xl border-white/5"
+                : "py-8 bg-transparent border-transparent"
                 } px-6 md:px-16 flex items-center justify-between`}
         >
             {/* Brand */}
             <a
                 href="#hero"
-                className="font-black text-xl tracking-[ -0.05em] uppercase hover:opacity-80 transition-opacity"
+                className="block h-10 md:h-12 hover:opacity-80 transition-opacity"
             >
-                TEDx<span className="text-ted-red">ICEAS</span>
+                <img
+                    src="/logo-white.png"
+                    alt="TEDxICEAS Logo"
+                    className="h-full w-auto object-contain"
+                />
             </a>
 
             {/* Desktop */}

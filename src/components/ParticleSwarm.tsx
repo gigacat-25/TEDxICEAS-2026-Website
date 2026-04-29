@@ -6,294 +6,196 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
+/**
+ * THEME: WHAT SHAPES US
+ * Reverted to single powerful organic focal structure.
+ * Multi-shape nodes: Squares, Triangles, and Diamonds.
+ * Dark Cinematic Red.
+ */
+
 export default function ParticleSwarm() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const mouse = useRef(new THREE.Vector2(-999, -999));
 
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // --- CONFIG ---
-    const COUNT = 20000;
-    const SPEED_MULT = 1;
+    const COUNT = 30000;
+    const numMajorShapes = 5;
 
-    // --- SETUP ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0d0d0d, 0.005);
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      2000
-    );
-    camera.position.set(0, 0, 120);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2500);
+    camera.position.z = 200;
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: "high-performance",
-      alpha: true,
-    });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    // --- POST PROCESSING ---
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5,
-      0.4,
-      0.85
-    );
-    bloomPass.strength = 1.2;
-    bloomPass.radius = 0.5;
-    bloomPass.threshold = 0;
-    composer.addPass(bloomPass);
+    // Post-processing removed as requested
 
-    // --- INSTANCED MESH ---
-    const geometry = new THREE.TetrahedronGeometry(0.25);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    // --- GEOMETRY ---
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(COUNT * 3);
+    const colors = new Float32Array(COUNT * 3);
 
-    const instancedMesh = new THREE.InstancedMesh(geometry, material, COUNT);
-    instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    scene.add(instancedMesh);
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("customColor", new THREE.BufferAttribute(colors, 3));
 
-    // --- SHAPE GENERATORS ---
-    const shapes: THREE.Vector3[][] = [];
-    const numShapes = 5;
+    // --- SHADER MATERIAL ---
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uPointSize: { value: 2.5 * window.devicePixelRatio }
+      },
+      vertexShader: `
+        uniform float uPointSize;
+        attribute vec3 customColor;
+        varying vec3 vColor;
+        void main() {
+          vColor = customColor;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = uPointSize * (250.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+          float r = dot(cxy, cxy);
+          if (r > 1.0) discard;
+          gl_FragColor = vec4(vColor, 1.0);
+        }
+      `,
+      transparent: true,
+      depthTest: false
+    });
 
-    // Utility random point inside triangle (barycentric coordinates)
-    function randomPointInTriangle(
-      v1: THREE.Vector3,
-      v2: THREE.Vector3,
-      v3: THREE.Vector3
-    ) {
-      let r1 = Math.random();
-      let r2 = Math.random();
-      if (r1 + r2 > 1) {
-        r1 = 1 - r1;
-        r2 = 1 - r2;
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // --- ORGANIC MORPHING SYSTEM ---
+    const shapes: Float32Array[] = [];
+
+    function generateOrganicBlob(noiseScale: number, radius: number) {
+      const arr = new Float32Array(COUNT * 3);
+      for (let i = 0; i < COUNT; i++) {
+        const phi = Math.acos(1.0 - 2.0 * ((i + 0.5) / COUNT));
+        const theta = 2.399963 * i;
+        const x = Math.sin(phi) * Math.cos(theta);
+        const y = Math.cos(phi);
+        const z = Math.sin(phi) * Math.sin(theta);
+        const n = Math.sin(x * noiseScale) * 0.5 + Math.cos(y * noiseScale * 1.5) * 0.5;
+        const mag = radius * (0.8 + n * 0.4);
+        arr[i * 3] = x * mag;
+        arr[i * 3 + 1] = y * mag;
+        arr[i * 3 + 2] = z * mag;
       }
-      const a = 1 - r1 - r2;
-      return new THREE.Vector3(
-        a * v1.x + r1 * v2.x + r2 * v3.x,
-        a * v1.y + r1 * v2.y + r2 * v3.y,
-        a * v1.z + r1 * v2.z + r2 * v3.z
-      );
+      return arr;
     }
 
-    // 0. Sphere Swarm (Hero)
-    const shapeSphere: THREE.Vector3[] = [];
-    const crowdRadius = 45;
-    for (let i = 0; i < COUNT; i++) {
-      // distribute evenly on spherical surface via fibonacci spiral
-      const phi = Math.acos(1.0 - 2.0 * ((i + 0.5) / COUNT));
-      const theta = 2.399963 * i;
-      const r = crowdRadius * (0.6 + Math.random() * 0.4);
-      shapeSphere.push(
-        new THREE.Vector3(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.cos(phi),
-          r * Math.sin(phi) * Math.sin(theta)
-        )
-      );
-    }
-    shapes.push(shapeSphere);
+    shapes.push(generateOrganicBlob(1.5, 80));
+    shapes.push(generateOrganicBlob(2.2, 110));
+    shapes.push(generateOrganicBlob(1.1, 100));
+    shapes.push(generateOrganicBlob(3.0, 120));
+    shapes.push(generateOrganicBlob(0.8, 150));
 
-    // 1. Triangle (About)
-    const shapeTriangle: THREE.Vector3[] = [];
-    const triSize = 60;
-    const t1 = new THREE.Vector3(0, triSize, 0);
-    const t2 = new THREE.Vector3(-triSize * 0.866, -triSize * 0.5, 0);
-    const t3 = new THREE.Vector3(triSize * 0.866, -triSize * 0.5, 0);
-    for (let i = 0; i < COUNT; i++) {
-      const pt = randomPointInTriangle(t1, t2, t3);
-      pt.z += (Math.random() - 0.5) * 8;
-      shapeTriangle.push(pt);
-    }
-    shapes.push(shapeTriangle);
+    const currentPositions = new Float32Array(COUNT * 3);
+    const targetPositions = new Float32Array(COUNT * 3);
 
-    // 2. Square (Speakers)
-    const shapeSquare: THREE.Vector3[] = [];
-    const sqSize = 45;
-    for (let i = 0; i < COUNT; i++) {
-      shapeSquare.push(
-        new THREE.Vector3(
-          (Math.random() - 0.5) * sqSize * 2,
-          (Math.random() - 0.5) * sqSize * 2,
-          (Math.random() - 0.5) * 8
-        )
-      );
-    }
-    shapes.push(shapeSquare);
-
-    // 3. Star (Schedule)
-    const shapeStar: THREE.Vector3[] = [];
-    function generateStarPoints(
-      innerRadius: number,
-      outerRadius: number,
-      points: number
-    ) {
-      const vertices: THREE.Vector3[] = [];
-      for (let i = 0; i < points * 2; i++) {
-        const r = i % 2 === 0 ? outerRadius : innerRadius;
-        const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
-        vertices.push(
-          new THREE.Vector3(r * Math.cos(angle), r * Math.sin(angle), 0)
-        );
-      }
-      return vertices;
-    }
-    const starVertices = generateStarPoints(20, 50, 5);
-    for (let i = 0; i < COUNT; i++) {
-      const segment = Math.floor(Math.random() * starVertices.length);
-      const nextSegment = (segment + 1) % starVertices.length;
-      const pt = randomPointInTriangle(
-        new THREE.Vector3(0, 0, 0),
-        starVertices[segment],
-        starVertices[nextSegment]
-      );
-      pt.z += (Math.random() - 0.5) * 8;
-      shapeStar.push(pt);
-    }
-    shapes.push(shapeStar);
-
-    // 4. Hexagon (Register)
-    const shapeHexagon: THREE.Vector3[] = [];
-    const hexVertices = generateStarPoints(50, 50, 3); // 6 outer points on a circle = hexagon
-    for (let i = 0; i < COUNT; i++) {
-      const segment = Math.floor(Math.random() * hexVertices.length);
-      const nextSegment = (segment + 1) % hexVertices.length;
-      const pt = randomPointInTriangle(
-        new THREE.Vector3(0, 0, 0),
-        hexVertices[segment],
-        hexVertices[nextSegment]
-      );
-      pt.z += (Math.random() - 0.5) * 8;
-      shapeHexagon.push(pt);
-    }
-    shapes.push(shapeHexagon);
-
-    // --- DATA ARRAYS ---
-    const positions: THREE.Vector3[] = [];
-    const color = new THREE.Color();
-    const dummy = new THREE.Object3D();
-
-    for (let i = 0; i < COUNT; i++) {
-      positions.push(shapes[0][i].clone());
-      instancedMesh.setColorAt(i, color.setHex(0xe62b1e));
-    }
-
-    // --- SCROLL LOGIC ---
     let scrollProgress = 0;
+    const raycaster = new THREE.Raycaster();
+    const mouseWorld = new THREE.Vector3();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
-    function updateScroll() {
-      // Use documentElement scrollHeight to get the full page height accurately
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const updateScroll = () => {
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      let scrollY = window.scrollY;
+      const progress = (window.scrollY / (maxScroll || 1)) * (numMajorShapes - 1);
+      scrollProgress = Math.max(0, Math.min(progress, numMajorShapes - 1));
+    };
 
-      if (maxScroll <= 0) {
-        scrollProgress = 0;
-        return;
-      }
-
-      const progress = (scrollY / maxScroll) * (numShapes - 1);
-      scrollProgress = Math.max(0, Math.min(progress, numShapes - 1));
-    }
-
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("scroll", updateScroll);
-    window.addEventListener("resize", updateScroll);
-    // Timeout to ensure DOM is fully laid out before initial calculation
-    setTimeout(updateScroll, 100);
+    updateScroll();
 
-    // --- ANIMATION LOOP ---
     const clock = new THREE.Clock();
-    let animationFrameId: number;
-
-    const targetPos = new THREE.Vector3();
 
     function animate() {
-      animationFrameId = requestAnimationFrame(animate);
-      const time = clock.getElapsedTime() * SPEED_MULT;
+      const time = clock.getElapsedTime();
+      requestAnimationFrame(animate);
 
-      const fromShapeIdx = Math.floor(scrollProgress);
-      const toShapeIdx = Math.min(fromShapeIdx + 1, numShapes - 1);
-      const lerpFactor = scrollProgress - fromShapeIdx;
+      material.uniforms.uTime.value = time;
 
-      const viralEnergy = 1.2;
+      const fromIdx = Math.floor(scrollProgress);
+      const toIdx = Math.min(fromIdx + 1, numMajorShapes - 1);
+      const lerpFactor = scrollProgress - fromIdx;
+
+      raycaster.setFromCamera(mouse.current, camera);
+      raycaster.ray.intersectPlane(plane, mouseWorld);
+
+      const posAttr = geometry.attributes.position;
+      const colAttr = geometry.attributes.customColor;
 
       for (let i = 0; i < COUNT; i++) {
-        // Calculate Target Position based on Scroll
-        targetPos
-          .copy(shapes[fromShapeIdx][i])
-          .lerp(shapes[toShapeIdx][i], lerpFactor);
+        const i3 = i * 3;
+        const tx = THREE.MathUtils.lerp(shapes[fromIdx][i3], shapes[toIdx][i3], lerpFactor);
+        const ty = THREE.MathUtils.lerp(shapes[fromIdx][i3 + 1], shapes[toIdx][i3 + 1], lerpFactor);
+        const tz = THREE.MathUtils.lerp(shapes[fromIdx][i3 + 2], shapes[toIdx][i3 + 2], lerpFactor);
 
-        // Noise jitter to make it alive
-        const wx = Math.sin(time * 3.1 + i * 0.5) * viralEnergy;
-        const wy = Math.cos(time * 2.7 + i * 0.8) * viralEnergy;
-        const wz = Math.sin(time * 2.3 + i * 0.3) * viralEnergy;
+        const wave = Math.sin(time * 0.5 + i * 0.05) * 3;
+        targetPositions[i3] = tx + Math.cos(time * 0.3 + ty * 0.04) * wave;
+        targetPositions[i3 + 1] = ty + Math.sin(time * 0.4 + tx * 0.04) * wave;
+        targetPositions[i3 + 2] = tz;
 
-        targetPos.x += wx;
-        targetPos.y += wy;
-        targetPos.z += wz;
+        const dx = targetPositions[i3] - mouseWorld.x;
+        const dy = targetPositions[i3 + 1] - mouseWorld.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Dynamic color based on position in swarm + time
-        const infection = (Math.sin(time * 1.5 + i * 0.02) + 1) * 0.5;
-        color.setHSL(0.01 + infection * 0.02, 0.85, 0.4 + infection * 0.15);
+        if (dist < 60) {
+          const force = (1.0 - dist / 60) * 45;
+          targetPositions[i3] += (dx / dist) * force;
+          targetPositions[i3 + 1] += (dy / dist) * force;
+        }
 
-        // Smooth follow
-        positions[i].lerp(targetPos, 0.08);
+        currentPositions[i3] = THREE.MathUtils.lerp(currentPositions[i3], targetPositions[i3], 0.1);
+        currentPositions[i3 + 1] = THREE.MathUtils.lerp(currentPositions[i3 + 1], targetPositions[i3 + 1], 0.1);
+        currentPositions[i3 + 2] = THREE.MathUtils.lerp(currentPositions[i3 + 2], targetPositions[i3 + 2], 0.1);
 
-        dummy.position.copy(positions[i]);
-        dummy.lookAt(0, 0, 0);
-        dummy.updateMatrix();
+        posAttr.setXYZ(i, currentPositions[i3], currentPositions[i3 + 1], currentPositions[i3 + 2]);
 
-        instancedMesh.setMatrixAt(i, dummy.matrix);
-        instancedMesh.setColorAt(i, color);
+        colAttr.setXYZ(i, 0.55, 0.0, 0.02);
       }
 
-      instancedMesh.instanceMatrix.needsUpdate = true;
-      if (instancedMesh.instanceColor) {
-        instancedMesh.instanceColor.needsUpdate = true;
-      }
-
-      // Global slight rotation
-      scene.rotation.y = Math.sin(time * 0.1) * 0.15;
-      scene.rotation.x = Math.cos(time * 0.12) * 0.08;
-
-      composer.render();
+      posAttr.needsUpdate = true;
+      colAttr.needsUpdate = true;
+      renderer.render(scene, camera);
     }
     animate();
 
-    const handleResize = () => {
+    const resize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      composer.setSize(window.innerWidth, window.innerHeight);
-      updateScroll();
+      material.uniforms.uPointSize.value = 1.2 * window.devicePixelRatio;
     };
+    window.addEventListener("resize", resize);
 
-    window.addEventListener("resize", handleResize);
-
-    // Initialization cleanup
     return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", updateScroll);
-      window.removeEventListener("resize", updateScroll);
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
+      window.removeEventListener("resize", resize);
+      if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
       renderer.dispose();
       geometry.dispose();
       material.dispose();
     };
   }, []);
 
-  return (
-    <div
-      ref={mountRef}
-      className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
-    />
-  );
+  return <div ref={mountRef} className="fixed inset-0 z-0 pointer-events-none" />;
 }

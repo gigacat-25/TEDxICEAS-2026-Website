@@ -53,28 +53,26 @@ export default function Home() {
 
         {/* ── HERO SECTION ── */}
         <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none">
-          <div className="space-y-4 animate-in fade-in duration-1000 slide-in-from-bottom-8">
-            <p className="text-[0.6rem] md:text-xs uppercase tracking-[0.4em] text-ted-red font-bold opacity-80">
-              x = independently organized TED event
-            </p>
-            <h1 className="text-7xl md:text-9xl lg:text-[11rem] font-black tracking-[-0.06em] leading-[0.8] uppercase flex flex-col">
-              <span>TED<span className="text-ted-red">x</span></span>
-              <span className="text-white">ICEAS</span>
-            </h1>
-            <div className="pt-8 space-y-2">
-              <h2 className="text-2xl md:text-4xl font-light tracking-wide text-white/60">
-                What <span className="text-white font-medium italic">Shapes</span> Us
-              </h2>
-              <p className="text-[0.7rem] uppercase tracking-[0.3em] text-white/30">
-                April 17th, 2026 · Bengaluru, India
+          <div className="relative z-10 text-center w-full px-6 max-w-7xl mx-auto">
+            <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+              <p className="text-ted-red text-[0.65rem] md:text-[0.75rem] uppercase tracking-[0.6em] font-black">
+                X = Independently Organized TED Event
               </p>
             </div>
-            <div className="pt-10">
+
+            <h1 className="text-6xl md:text-9xl lg:text-[11rem] font-black uppercase tracking-tighter italic leading-[0.8] mb-16 animate-in zoom-in-95 fade-in duration-1000 delay-200 drop-shadow-2xl flex flex-wrap justify-center gap-x-6 md:gap-x-12">
+              <span className="text-white">What</span>
+              <span className="text-ted-red">Shapes</span>
+              <span className="text-white">Us</span>
+            </h1>
+
+            <div className="flex flex-col items-center justify-center gap-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-400">
               <a
-                href="#register"
-                className="group relative inline-flex items-center justify-center px-12 py-5 overflow-hidden font-bold transition-all bg-ted-red hover:bg-white"
+                href="#about"
+                className="px-16 py-6 bg-white text-charcoal font-black uppercase tracking-[0.3em] text-xs md:text-sm hover:bg-ted-red hover:text-white transition-all duration-500 shadow-2xl group"
               >
-                <span className="relative text-white group-hover:text-ted-red uppercase tracking-widest text-xs transition-colors duration-300">Get Tickets</span>
+                The Experience
+                <span className="inline-block ml-3 group-hover:translate-x-2 transition-transform">→</span>
               </a>
             </div>
           </div>
@@ -186,9 +184,13 @@ export default function Home() {
       <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-charcoal border-t border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-start gap-12">
           <div className="space-y-4">
-            <h3 className="font-black text-3xl tracking-tighter uppercase leading-none">
-              TEDx<span className="text-ted-red">ICEAS</span>
-            </h3>
+            <div className="h-10 md:h-12 w-fit">
+              <img
+                src="/logo-white.png"
+                alt="TEDxICEAS Logo"
+                className="h-full w-auto object-contain"
+              />
+            </div>
             <p className="text-white/20 text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
               This independent TEDx event is operated under license from TED.
             </p>
