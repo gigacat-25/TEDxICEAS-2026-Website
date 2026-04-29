@@ -1,5 +1,5 @@
-import ParticleSwarm from "@/components/ParticleSwarm";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 const speakers = [
   { name: "Dr. M A Saleem IPS", role: "Director General of Police, CID Karnataka" },
@@ -41,9 +41,7 @@ const schedule = [
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-charcoal text-[#f0f0f0]">
-      {/* Background Particles Layer */}
-      <ParticleSwarm />
+    <div className="relative min-h-screen text-[#f0f0f0]">
 
       {/* Navigation */}
       <Navbar />
@@ -52,79 +50,132 @@ export default function Home() {
       <main className="relative z-10">
 
         {/* ── HERO SECTION ── */}
-        <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none">
-          <div className="relative z-10 text-center w-full px-6 max-w-7xl mx-auto">
-            <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-              <p className="text-ted-red text-[0.65rem] md:text-[0.75rem] uppercase tracking-[0.6em] font-black">
-                X = Independently Organized TED Event
+        <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none pt-10">
+          <div className="relative z-10 text-center w-full px-6 max-w-5xl mx-auto space-y-12">
+            {/* Top Logo Area */}
+            <div className="flex flex-col items-center animate-in fade-in duration-1000">
+              <div className="flex items-center gap-0 text-4xl md:text-6xl font-bold tracking-tighter">
+                <span className="text-[#E62B1E]">TED</span>
+                <span className="text-[#E62B1E] text-2xl md:text-4xl mb-3">x</span>
+                <span className="text-white ml-1">ICEAS</span>
+              </div>
+              <p className="text-white text-[0.7rem] md:text-[0.85rem] font-medium tracking-tight mt-1">
+                <span className="text-[#E62B1E]">x</span> = independently organized TED event
               </p>
             </div>
 
-            <h1 className="text-6xl md:text-9xl lg:text-[11rem] font-black uppercase tracking-tighter italic leading-[0.8] mb-16 animate-in zoom-in-95 fade-in duration-1000 delay-200 drop-shadow-2xl flex flex-wrap justify-center gap-x-6 md:gap-x-12">
-              <span className="text-white">What</span>
-              <span className="text-ted-red">Shapes</span>
-              <span className="text-white">Us</span>
+            {/* Main Title */}
+            <h1 className="text-4xl md:text-7xl font-bold text-white tracking-tight animate-in slide-in-from-bottom-4 fade-in duration-1000 delay-200">
+              Threads of Change
             </h1>
 
-            <div className="flex flex-col items-center justify-center gap-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-400">
-              <a
-                href="#about"
-                className="px-16 py-6 bg-white text-charcoal font-black uppercase tracking-[0.3em] text-xs md:text-sm hover:bg-ted-red hover:text-white transition-all duration-500 shadow-2xl group"
+            {/* Date */}
+            <p className="text-lg md:text-2xl font-medium text-white/80 italic animate-in fade-in duration-1000 delay-400">
+              April 17th 2025
+            </p>
+
+            {/* CTA Button */}
+            <div className="pt-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
+              <Link
+                href="/#register"
+                className="inline-block px-12 py-4 bg-white text-[#E62B1E] font-bold rounded-full hover:scale-105 hover:shadow-2xl hover:shadow-white/10 transition-all duration-300 shadow-xl"
               >
-                The Experience
-                <span className="inline-block ml-3 group-hover:translate-x-2 transition-transform">→</span>
-              </a>
+                Get Tickets
+              </Link>
             </div>
           </div>
 
           {/* Scroll cue */}
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20">
-            <div className="w-[1px] h-16 bg-white animate-pulse" />
+            <div className="w-[1px] h-12 bg-white animate-pulse" />
           </div>
         </section>
 
         {/* ── THEME SECTION ── */}
-        <section id="about" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-40 py-32 bg-gradient-to-b from-transparent via-charcoal/40 to-transparent">
-          <div className="max-w-4xl space-y-12">
-            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">The Concept</p>
-            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">
-              Every curve, <br className="hidden md:block" /> every <span className="text-ted-red italic">void</span>.
-            </h2>
-            <div className="grid md:grid-cols-2 gap-12 pt-8">
-              <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
-                In the spirit of discovering and spreading ideas, TED has created TEDx — local, self-organized events that bring people together to share a TED-like experience.
-              </p>
-              <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
-                At <strong className="text-white font-medium">TEDxICEAS</strong>, live speakers and TED Talks videos combine to spark deep discussion. Our 2026 theme explores the forces, stories, and ideas that define our identity.
-              </p>
+        <section id="about" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-40 py-32 bg-transparent">
+          <div className="max-w-6xl mx-auto space-y-20">
+            <div className="max-w-4xl space-y-12">
+              <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">The Concept</p>
+              <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">
+                Unraveling the <br className="hidden md:block" /> tapestry of <span className="text-ted-red italic">ideas</span>.
+              </h2>
+              <div className="grid md:grid-cols-2 gap-12 pt-8">
+                <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
+                  In the spirit of discovering and spreading ideas, TED has created TEDx — local, self-organized events that bring people together to share a TED-like experience.
+                </p>
+                <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
+                  At <strong className="text-white font-medium">TEDxICEAS</strong>, live speakers and TED Talks videos combine to spark deep discussion. Our 2026 theme, "Threads of Change", explores the forces, stories, and ideas that define our future.
+                </p>
+              </div>
             </div>
+
+          </div>
+        </section>
+
+        {/* ── TEAM SECTION ── */}
+        <section id="team" className="py-24 px-6 md:px-20 lg:px-40 bg-transparent">
+          <div className="max-w-6xl mx-auto text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-12">Our Team</h2>
+            
+            <div className="relative group max-w-4xl mx-auto mb-12">
+              <div className="aspect-[16/9] rounded-[2rem] overflow-hidden border border-[#E62B1E]/20 shadow-[0_0_50px_rgba(230,43,30,0.1)]">
+                {/* Replace src with your team photo path */}
+                <img 
+                  src="https://via.placeholder.com/1200x675/111/fff?text=TEDxICEAS+Team+Photo" 
+                  alt="TEDxICEAS Team"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            <p className="max-w-5xl mx-auto text-base md:text-lg text-white/90 leading-relaxed mb-10 px-4">
+              The <span className="text-[#E62B1E] font-bold">TEDxICEAS</span> team is composed of dedicated volunteers who are passionate about spreading ideas and creating a TED-like experience in our community. Our team members bring diverse skills and experiences to the table, working collaboratively to make this event a success
+            </p>
+
+            <Link 
+              href="/team" 
+              className="inline-block px-10 py-3 bg-white text-[#E62B1E] font-bold rounded-xl hover:scale-105 transition-all duration-300"
+            >
+              Meet the Team
+            </Link>
           </div>
         </section>
 
         {/* ── SPEAKERS SECTION ── */}
-        <section id="speakers" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 border-t border-white/5">
+        <section id="speakers" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
           <header className="mb-20 space-y-6">
             <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Global Perspectives</p>
-            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white">The Lineup</h2>
+            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase italic">The Lineup</h2>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-px gap-y-px bg-white/10 border border-white/10 rounded-sm overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-12 gap-y-16">
             {speakers.map((s, i) => (
-              <div key={i} className="group relative aspect-square bg-charcoal p-10 flex flex-col justify-between hover:bg-ted-red transition-all duration-700">
-                <span className="text-5xl font-black text-white/5 group-hover:text-white/10 transition-colors uppercase select-none tracking-tighter">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <h3 className="text-white font-bold text-xl md:text-2xl leading-none mb-3 group-hover:translate-x-2 transition-transform duration-500">{s.name}</h3>
-                  <p className="text-white/40 text-xs uppercase tracking-widest font-medium group-hover:text-white/70 transition-colors duration-500">{s.role}</p>
+              <div key={i} className="group space-y-6 text-center">
+                <div className="aspect-square rounded-full overflow-hidden border border-white/10 group-hover:border-ted-red transition-all duration-500 relative max-w-[200px] mx-auto">
+                  <img 
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${s.name}`} 
+                    alt={s.name}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
+                  />
+                  <div className="absolute inset-0 bg-ted-red/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-white font-bold text-lg md:text-xl leading-tight group-hover:text-ted-red transition-colors">{s.name}</h3>
+                  <p className="text-white/40 text-[0.6rem] uppercase tracking-widest font-medium leading-tight">{s.role}</p>
                 </div>
               </div>
             ))}
           </div>
+          
+          <div className="mt-20 text-center">
+             <Link href="/speakers" className="inline-block border border-white/20 px-12 py-5 text-[0.7rem] uppercase tracking-[0.4em] font-black hover:bg-white hover:text-charcoal transition-all">
+                View Detailed Bios
+             </Link>
+          </div>
         </section>
 
         {/* ── SCHEDULE SECTION ── */}
-        <section id="schedule" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-white/[0.01]">
+        <section id="schedule" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-transparent">
           <div className="max-w-5xl">
             <header className="mb-24 space-y-6 text-center md:text-left">
               <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Program</p>
@@ -145,8 +196,10 @@ export default function Home() {
           </div>
         </section>
 
+
+
         {/* ── VENUE & REGISTRATION ── */}
-        <section id="register" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 flex flex-col justify-center">
+        <section id="register" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 flex flex-col justify-center bg-transparent">
           <div className="grid lg:grid-cols-2 gap-20 items-end">
             <div className="space-y-10">
               <div className="space-y-4">
@@ -181,7 +234,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-charcoal border-t border-white/5">
+      <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-start gap-12">
           <div className="space-y-4">
             <div className="h-10 md:h-12 w-fit">

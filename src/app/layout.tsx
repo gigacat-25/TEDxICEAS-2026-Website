@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ParticleSwarm from "@/components/ParticleSwarm";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TEDx ICEAS 2026 | What Shapes Us",
+  title: "TEDx ICEAS 2026 | Threads of Change",
   description:
-    "TEDxICEAS is an independently organized TED event at Impact College of Engineering and Applied Sciences, Bengaluru. Join us for 2026 under the theme 'What Shapes Us'.",
+    "TEDxICEAS is an independently organized TED event at Impact College of Engineering and Applied Sciences, Bengaluru. Join us for 2026 under the theme 'Threads of Change'.",
 };
 
 export default function RootLayout({
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="bg-[#0d0d0d] text-[#f0f0f0] antialiased overflow-x-hidden">
+        <ParticleSwarm />
         {children}
       </body>
     </html>

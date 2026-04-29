@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -12,10 +13,11 @@ export default function Navbar() {
     }, []);
 
     const links = [
-        { label: "About", href: "#about" },
-        { label: "Speakers", href: "#speakers" },
-        { label: "Schedule", href: "#schedule" },
-        { label: "Location", href: "#register" },
+        { label: "Home", href: "/" },
+        { label: "Speakers", href: "/speakers" },
+        { label: "Sponsors", href: "/sponsors" },
+        { label: "Team", href: "/team" },
+        { label: "About", href: "/about" },
     ];
 
     return (
@@ -26,8 +28,8 @@ export default function Navbar() {
                 } px-6 md:px-16 flex items-center justify-between`}
         >
             {/* Brand */}
-            <a
-                href="#hero"
+            <Link
+                href="/"
                 className="block h-10 md:h-12 hover:opacity-80 transition-opacity"
             >
                 <img
@@ -35,25 +37,25 @@ export default function Navbar() {
                     alt="TEDxICEAS Logo"
                     className="h-full w-auto object-contain"
                 />
-            </a>
+            </Link>
 
             {/* Desktop */}
             <nav className="hidden md:flex items-center gap-12">
                 {links.map((l) => (
-                    <a
+                    <Link
                         key={l.label}
                         href={l.href}
                         className="text-[0.65rem] font-bold uppercase tracking-[0.25em] text-white/40 hover:text-white transition-colors"
                     >
                         {l.label}
-                    </a>
+                    </Link>
                 ))}
-                <a
-                    href="#register"
+                <Link
+                    href="/#register"
                     className="text-[0.65rem] font-bold uppercase tracking-[0.2em] px-8 py-3 bg-ted-red hover:bg-white hover:text-ted-red text-white transition-all duration-300"
                 >
                     Tickets
-                </a>
+                </Link>
             </nav>
 
             {/* Mobile Trigger */}
@@ -76,23 +78,24 @@ export default function Navbar() {
                     <button onClick={() => setOpen(false)} className="text-white/40 uppercase text-[0.6rem] tracking-widest">Close</button>
                 </div>
                 {links.map((l) => (
-                    <a
+                    <Link
                         key={l.label}
                         href={l.href}
                         onClick={() => setOpen(false)}
                         className="text-2xl font-black uppercase tracking-tighter text-white hover:text-ted-red"
                     >
                         {l.label}
-                    </a>
+                    </Link>
                 ))}
-                <a
-                    href="#register"
+                <Link
+                    href="/#register"
                     onClick={() => setOpen(false)}
                     className="mt-4 text-center bg-ted-red text-white py-5 font-bold uppercase tracking-widest text-xs"
                 >
                     Get Tickets
-                </a>
+                </Link>
             </div>
         </header>
     );
 }
+

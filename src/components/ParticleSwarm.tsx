@@ -20,7 +20,7 @@ export default function ParticleSwarm() {
   useEffect(() => {
     if (!mountRef.current) return;
 
-    const COUNT = 30000;
+    const COUNT = 29791; // 31^3 for a perfect cube grid
     const numMajorShapes = 5;
 
     const scene = new THREE.Scene();
@@ -46,7 +46,7 @@ export default function ParticleSwarm() {
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uPointSize: { value: 2.5 * window.devicePixelRatio }
+        uPointSize: { value: 1.8 * (typeof window !== "undefined" ? window.devicePixelRatio : 1) }
       },
       vertexShader: `
         uniform float uPointSize;
@@ -55,7 +55,7 @@ export default function ParticleSwarm() {
         void main() {
           vColor = customColor;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = uPointSize * (250.0 / -mvPosition.z);
+          gl_PointSize = uPointSize * (300.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
@@ -65,7 +65,9 @@ export default function ParticleSwarm() {
           vec2 cxy = 2.0 * gl_PointCoord - 1.0;
           float r = dot(cxy, cxy);
           if (r > 1.0) discard;
-          gl_FragColor = vec4(vColor, 1.0);
+          // Shard-like effect: slightly sharper edges
+          float alpha = 1.0 - smoothstep(0.5, 1.0, r);
+          gl_FragColor = vec4(vColor, alpha * 0.8);
         }
       `,
       transparent: true,
@@ -75,36 +77,67 @@ export default function ParticleSwarm() {
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
-    // --- ORGANIC MORPHING SYSTEM ---
+    // --- SHAPE GENERATION SYSTEM ---
     const shapes: Float32Array[] = [];
 
-    function generateOrganicBlob(noiseScale: number, radius: number) {
+    function generateGrid() {
       const arr = new Float32Array(COUNT * 3);
+      const s = Math.ceil(Math.pow(COUNT, 1/3));
+      const sep = 5.0; // Increased separation for better visibility
+      const off = (s * sep) / 2;
+      
       for (let i = 0; i < COUNT; i++) {
-        const phi = Math.acos(1.0 - 2.0 * ((i + 0.5) / COUNT));
-        const theta = 2.399963 * i;
-        const x = Math.sin(phi) * Math.cos(theta);
-        const y = Math.cos(phi);
-        const z = Math.sin(phi) * Math.sin(theta);
-        const n = Math.sin(x * noiseScale) * 0.5 + Math.cos(y * noiseScale * 1.5) * 0.5;
-        const mag = radius * (0.8 + n * 0.4);
-        arr[i * 3] = x * mag;
-        arr[i * 3 + 1] = y * mag;
-        arr[i * 3 + 2] = z * mag;
+        const i3 = i * 3;
+        const z = Math.floor(i / (s * s));
+        const y = Math.floor((i % (s * s)) / s);
+        const x = i % s;
+        
+        arr[i3] = x * sep - off;
+        arr[i3 + 1] = y * sep - off;
+        arr[i3 + 2] = z * sep - off;
       }
       return arr;
     }
 
-    shapes.push(generateOrganicBlob(1.5, 80));
-    shapes.push(generateOrganicBlob(2.2, 110));
-    shapes.push(generateOrganicBlob(1.1, 100));
-    shapes.push(generateOrganicBlob(3.0, 120));
-    shapes.push(generateOrganicBlob(0.8, 150));
+    function generateScatter(intensity: number) {
+      const arr = new Float32Array(COUNT * 3);
+      const s = Math.ceil(Math.pow(COUNT, 1/3));
+      const sep = 5.0;
+      const off = (s * sep) / 2;
+      
+      for (let i = 0; i < COUNT; i++) {
+        const i3 = i * 3;
+        const z = Math.floor(i / (s * s));
+        const y = Math.floor((i % (s * s)) / s);
+        const x = i % s;
+        
+        // Base grid position
+        const bx = x * sep - off;
+        const by = y * sep - off;
+        const bz = z * sep - off;
+        
+        // Scatter intensity increases random displacement
+        const range = 100 * intensity;
+        arr[i3] = bx + (Math.random() - 0.5) * range * 4;
+        arr[i3 + 1] = by + (Math.random() - 0.5) * range * 4;
+        arr[i3 + 2] = bz + (Math.random() - 0.5) * range * 4;
+      }
+      return arr;
+    }
+
+    // Stage 0: Perfect Grid
+    shapes.push(generateGrid());
+    // Stages 1-4: Increasingly scattered
+    shapes.push(generateScatter(0.5));
+    shapes.push(generateScatter(1.2));
+    shapes.push(generateScatter(2.0));
+    shapes.push(generateScatter(3.5));
 
     const currentPositions = new Float32Array(COUNT * 3);
     const targetPositions = new Float32Array(COUNT * 3);
 
     let scrollProgress = 0;
+    let currentScrollY = 0;
     const raycaster = new THREE.Raycaster();
     const mouseWorld = new THREE.Vector3();
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -115,13 +148,14 @@ export default function ParticleSwarm() {
     };
 
     const updateScroll = () => {
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = (window.scrollY / (maxScroll || 1)) * (numMajorShapes - 1);
+      currentScrollY = window.scrollY;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = (currentScrollY / maxScroll) * (numMajorShapes - 1);
       scrollProgress = Math.max(0, Math.min(progress, numMajorShapes - 1));
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("scroll", updateScroll);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("scroll", updateScroll, { passive: true });
     updateScroll();
 
     const clock = new THREE.Clock();
@@ -132,6 +166,11 @@ export default function ParticleSwarm() {
 
       material.uniforms.uTime.value = time;
 
+      // Subtle parallax that keeps particles in view
+      // We move the points group slightly instead of the camera to avoid frustum clipping issues
+      const scrollShift = -currentScrollY * 0.02;
+      points.position.y = THREE.MathUtils.lerp(points.position.y, scrollShift, 0.05);
+
       const fromIdx = Math.floor(scrollProgress);
       const toIdx = Math.min(fromIdx + 1, numMajorShapes - 1);
       const lerpFactor = scrollProgress - fromIdx;
@@ -141,7 +180,7 @@ export default function ParticleSwarm() {
 
       const posAttr = geometry.attributes.position;
       const colAttr = geometry.attributes.customColor;
-      const tedRed = new THREE.Color("#ffffffff");
+      const tedRed = new THREE.Color("#950606");
 
       for (let i = 0; i < COUNT; i++) {
         const i3 = i * 3;
@@ -156,9 +195,10 @@ export default function ParticleSwarm() {
 
         const dx = targetPositions[i3] - mouseWorld.x;
         const dy = targetPositions[i3 + 1] - mouseWorld.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
 
-        if (dist < 60) {
+        if (distSq < 3600) { // dist < 60
+          const dist = Math.sqrt(distSq);
           const force = (1.0 - dist / 60) * 45;
           targetPositions[i3] += (dx / dist) * force;
           targetPositions[i3 + 1] += (dy / dist) * force;
@@ -169,7 +209,6 @@ export default function ParticleSwarm() {
         currentPositions[i3 + 2] = THREE.MathUtils.lerp(currentPositions[i3 + 2], targetPositions[i3 + 2], 0.1);
 
         posAttr.setXYZ(i, currentPositions[i3], currentPositions[i3 + 1], currentPositions[i3 + 2]);
-
         colAttr.setXYZ(i, tedRed.r, tedRed.g, tedRed.b);
       }
 
@@ -183,7 +222,7 @@ export default function ParticleSwarm() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      material.uniforms.uPointSize.value = 1.2 * window.devicePixelRatio;
+      material.uniforms.uPointSize.value = 1.8 * window.devicePixelRatio;
     };
     window.addEventListener("resize", resize);
 
