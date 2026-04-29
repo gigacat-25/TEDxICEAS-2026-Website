@@ -141,6 +141,7 @@ export default function ParticleSwarm() {
 
       const posAttr = geometry.attributes.position;
       const colAttr = geometry.attributes.customColor;
+      const tedRed = new THREE.Color("#ffffffff");
 
       for (let i = 0; i < COUNT; i++) {
         const i3 = i * 3;
@@ -169,7 +170,7 @@ export default function ParticleSwarm() {
 
         posAttr.setXYZ(i, currentPositions[i3], currentPositions[i3 + 1], currentPositions[i3 + 2]);
 
-        colAttr.setXYZ(i, 0.55, 0.0, 0.02);
+        colAttr.setXYZ(i, tedRed.r, tedRed.g, tedRed.b);
       }
 
       posAttr.needsUpdate = true;
