@@ -51,23 +51,15 @@ export default function Home() {
 
         {/* ── HERO SECTION ── */}
         <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none pt-10">
-          <div className="relative z-10 text-center w-full px-6 max-w-5xl mx-auto space-y-12">
-            {/* Top Logo Area */}
-            <div className="flex flex-col items-center animate-in fade-in duration-1000">
-              <div className="flex items-center gap-0 text-4xl md:text-6xl font-bold tracking-tighter">
-                <span className="text-[#E62B1E]">TED</span>
-                <span className="text-[#E62B1E] text-2xl md:text-4xl mb-3">x</span>
-                <span className="text-white ml-1">ICEAS</span>
-              </div>
-              <p className="text-white text-[0.7rem] md:text-[0.85rem] font-medium tracking-tight mt-1">
-                <span className="text-[#E62B1E]">x</span> = independently organized TED event
+            {/* Static Hero Title */}
+            <div className="space-y-4 mb-8">
+              <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                TEDx<span className="text-[#E62B1E]">ICEAS</span>
+              </h1>
+              <p className="text-2xl md:text-4xl font-light text-white/60 tracking-[0.2em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+                Threads of Change
               </p>
             </div>
-
-            {/* Main Title */}
-            <h1 className="text-4xl md:text-7xl font-bold text-white tracking-tight animate-in slide-in-from-bottom-4 fade-in duration-1000 delay-200">
-              Threads of Change
-            </h1>
 
             {/* Date */}
             <p className="text-lg md:text-2xl font-medium text-white/80 italic animate-in fade-in duration-1000 delay-400">
@@ -83,7 +75,6 @@ export default function Home() {
                 Get Tickets
               </Link>
             </div>
-          </div>
 
           {/* Scroll cue */}
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20">

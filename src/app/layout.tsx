@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import ParticleSwarm from "@/components/ParticleSwarm";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
+
+import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata: Metadata = {
   title: "TEDx ICEAS 2026 | Threads of Change",
@@ -19,11 +20,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
-      <body className="bg-[#0d0d0d] text-[#f0f0f0] antialiased overflow-x-hidden">
-        <ParticleSwarm />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+        <body className="bg-[#0d0d0d] text-[#f0f0f0] antialiased overflow-x-hidden">
+          <div className="relative z-10">
+            {children}
+          </div>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
