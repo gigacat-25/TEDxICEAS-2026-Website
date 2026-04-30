@@ -1,3 +1,5 @@
+import { getRequestContext } from "@cloudflare/next-on-pages";
+
 /**
  * Direct Cloudflare D1 REST API helper.
  * Bypasses Drizzle ORM — no column mapping issues, no binding bugs.
@@ -8,7 +10,6 @@ export async function d1<T = Record<string, unknown>>(
 ): Promise<T[]> {
   // Try native Cloudflare D1 binding first
   try {
-    const { getRequestContext } = require('@cloudflare/next-on-pages');
     const { env } = getRequestContext();
     const nativeDb = (env as any)?.DB;
     if (nativeDb) {
