@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import ParticleCanvas from "@/components/ParticleCanvas";
+import dynamic from "next/dynamic";
+const ParticleCanvas = dynamic(() => import("@/components/ParticleCanvas"), { ssr: false });
 
 const inter = Inter({
   subsets: ["latin"],

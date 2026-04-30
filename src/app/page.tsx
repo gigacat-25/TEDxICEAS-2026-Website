@@ -82,11 +82,13 @@ export default async function Home() {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-12">Our Team</h2>
             <div className="relative group max-w-4xl mx-auto mb-12">
               <div className="aspect-[16/9] rounded-[2rem] overflow-hidden border border-[#E62B1E]/20 shadow-[0_0_50px_rgba(230,43,30,0.1)]">
-                <img 
-                  src="https://via.placeholder.com/1200x675/111/fff?text=TEDxICEAS+Team+Photo" 
-                  alt="TEDxICEAS Team"
-                  className="w-full h-full object-cover"
-                />
+                <div 
+                  className="w-full h-full bg-[#111] flex flex-col items-center justify-center gap-4"
+                  style={{ background: 'linear-gradient(135deg, #111 0%, #1a0000 50%, #111 100%)' }}
+                >
+                  <span className="text-[#E62B1E] text-5xl font-black tracking-wider">TEDxICEAS</span>
+                  <span className="text-white/40 text-lg tracking-widest uppercase">Team Photo Coming Soon</span>
+                </div>
               </div>
             </div>
             <p className="max-w-5xl mx-auto text-base md:text-lg text-white/90 leading-relaxed mb-10 px-4">
