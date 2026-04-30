@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import ParticleCanvasWrapper from "@/components/ParticleCanvasWrapper";
 import "./globals.css";
-import dynamic from "next/dynamic";
-const ParticleCanvas = dynamic(() => import("@/components/ParticleCanvas"), { ssr: false });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
-
-import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata: Metadata = {
   title: "TEDx ICEAS 2026 | Threads of Change",
@@ -25,7 +23,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${inter.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
         <body className="bg-black text-[#f0f0f0] antialiased overflow-x-hidden">
-          <ParticleCanvas />
+          <ParticleCanvasWrapper />
           <div className="relative z-10">
             {children}
           </div>
