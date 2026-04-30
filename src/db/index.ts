@@ -228,27 +228,24 @@ class D1HttpClient implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'd
   }
 }
 
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
 /**
  * Returns a Drizzle ORM instance backed by D1.
  *
- * On Cloudflare Pages: uses native D1 binding via getRequestContext().env.DB
- * On local next dev:   uses D1 REST API (needs CLOUDFLARE_D1_TOKEN in .env)
+ * Uses @opennextjs/cloudflare to access the Cloudflare environment.
+ * Falls back to D1 REST API in local dev if no binding is available.
  */
 export function getDb(binding?: D1Database) {
   if (binding) return drizzle(binding, { schema });
 
-  // Try CF Pages runtime context (production & next-on-pages)
-  if (process.env.NODE_ENV !== 'development') {
-    try {
-      // Use a more dynamic way to avoid Turbopack static analysis errors
-      const pkgName = '@cloudflare/next-on-pages';
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getRequestContext } = require(pkgName);
-      const env = getRequestContext()?.env;
-      if (env?.DB) return drizzle(env.DB as D1Database, { schema });
-    } catch {
-      // fall through
-    }
+  // Try CF runtime context (production & preview)
+  try {
+    const { env } = getCloudflareContext();
+    const d1 = (env as any)?.DB;
+    if (d1) return drizzle(d1 as D1Database, { schema });
+  } catch {
+    // fall through
   }
 
   // Local next dev: prefer D1 REST API for speed and reliability
@@ -274,21 +271,17 @@ export function getDb(binding?: D1Database) {
 
 /**
  * Returns the R2 bucket binding.
- * Only available on Cloudflare Pages; throws a clear error in local dev.
+ * Only available on Cloudflare; throws a clear error in local dev.
  */
 export function getR2(): R2Bucket {
-  if (process.env.NODE_ENV !== 'development') {
-    try {
-      const pkgName = '@cloudflare/next-on-pages';
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getRequestContext } = require(pkgName);
-      const env = getRequestContext()?.env;
-      if (env?.R2) return env.R2 as R2Bucket;
-    } catch {
-      // fall through
-    }
+  try {
+    const { env } = getCloudflareContext();
+    const r2 = (env as any)?.R2;
+    if (r2) return r2 as R2Bucket;
+  } catch {
+    // fall through
   }
   throw new Error(
-    'R2 binding is only available on Cloudflare Pages. Image uploads require a CF Pages deployment.'
+    'R2 binding is only available on Cloudflare. Image uploads require a Cloudflare deployment.'
   );
 }

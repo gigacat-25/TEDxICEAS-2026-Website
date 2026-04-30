@@ -2,6 +2,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getSponsors } from "@/app/actions/sponsors";
 
+export const dynamic = 'force-dynamic';
+
 export default async function SponsorsPage() {
   let sponsors: any[] = [];
   try {

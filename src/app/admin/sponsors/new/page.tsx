@@ -132,7 +132,7 @@ export default function NewSponsorPage() {
               >
                 {imageUrl ? (
                   <div className="flex flex-col items-center">
-                    <Check className="w-8 h-8 mb-4 text-green-500" />
+                    <img src={imageUrl} alt="Preview" className="max-h-32 rounded-md mb-4 object-contain" />
                     <p className="text-sm font-medium text-green-500">Logo uploaded successfully</p>
                     <p className="text-xs text-muted-foreground mt-1">{fileName}</p>
                   </div>

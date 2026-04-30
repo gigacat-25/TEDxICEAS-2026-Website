@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getSpeakers } from "@/app/actions/speakers";
 import { getSchedule } from "@/app/actions/schedule";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   let speakers: any[] = [];
   let schedule: any[] = [];

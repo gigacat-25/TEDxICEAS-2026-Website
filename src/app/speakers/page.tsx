@@ -2,6 +2,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getSpeakers } from "@/app/actions/speakers";
 
+export const dynamic = 'force-dynamic';
+
 export default async function SpeakersPage() {
   let speakers: any[] = [];
   try {
