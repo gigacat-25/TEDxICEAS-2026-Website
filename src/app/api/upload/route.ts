@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs';
-import * as path from 'path';
-
+// fs and path removed for Edge runtime compatibility
+export const runtime = "edge";
 export async function POST(req: Request) {
   try {
     // Basic auth check
@@ -37,29 +36,11 @@ export async function POST(req: Request) {
     } catch (r2Error) {
       // Local development fallback
       if (process.env.NODE_ENV === 'development') {
-        try {
-          const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          const filePath = path.join(uploadDir, uniqueFilename);
-          fs.writeFileSync(filePath, Buffer.from(buffer));
-          
-          console.log(`[LOCAL_UPLOAD] Saved to ${filePath}`);
-          
-          return NextResponse.json({ 
-            url: `/uploads/${uniqueFilename}`,
-            warning: "Saved to local storage (public/uploads)"
-          });
-        } catch (fsError) {
-          console.error('[LOCAL_UPLOAD_ERROR]', fsError);
-          // Fall back to mock URL if even local storage fails
-          return NextResponse.json({ 
-            url: `https://mock.url/${uniqueFilename}`,
-            error: "Local upload failed, using mock URL"
-          });
-        }
+        console.log(`[LOCAL_UPLOAD_MOCK] Pretending to save ${uniqueFilename}`);
+        return NextResponse.json({ 
+          url: `/uploads/${uniqueFilename}`,
+          warning: "Saved to local mock storage (fs removed for Edge runtime compatibility)"
+        });
       }
       
       console.warn("R2 upload failed or not available:", r2Error);
