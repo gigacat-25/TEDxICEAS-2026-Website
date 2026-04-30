@@ -2,18 +2,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { getSpeakers } from "@/app/actions/speakers";
-import { getSponsors } from "@/app/actions/sponsors";
 import { getSchedule } from "@/app/actions/schedule";
 
 export default async function Home() {
   let speakers: any[] = [];
-  let sponsors: any[] = [];
-
   let schedule: any[] = [];
 
   try {
     speakers = await getSpeakers();
-    sponsors = await getSponsors();
     schedule = await getSchedule();
   } catch (error) {
     console.error("Failed to fetch dynamic content:", error);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ParticleCanvas from "@/components/ParticleCanvas";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +23,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${inter.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
-        <body className="bg-[#0d0d0d] text-[#f0f0f0] antialiased overflow-x-hidden">
+        <body className="bg-black text-[#f0f0f0] antialiased overflow-x-hidden">
+          <ParticleCanvas />
           <div className="relative z-10">
             {children}
           </div>
