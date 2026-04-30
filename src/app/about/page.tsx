@@ -42,24 +42,23 @@ export default function AboutPage() {
               <div className="space-y-6">
                 <h2 className="text-3xl font-bold uppercase italic tracking-tighter">About TED</h2>
                 <p className="text-gray-400 leading-relaxed text-lg">
-                  TED is a nonprofit, nonpartisan organization dedicated to discovering, debating and spreading ideas that spark conversation, deepen understanding and drive meaningful change. Our organization is devoted to curiosity, reason, wonder and the pursuit of knowledge — without an agenda. We welcome people from every discipline and culture who seek a deeper understanding of the world and connection with others, and we invite everyone to engage with ideas and activate them in your community.
+                  TED began in 1984 as a conference where Technology, Entertainment and Design converged, but today it spans a multitude of worldwide communities and initiatives exploring everything from science and business to education, arts and global issues. In addition to the TED Talks curated from our annual conferences and published on TED.com, we produce original podcasts, short video series, animated educational lessons (TED-Ed) and TV programs that are translated into more than 100 languages and distributed via partnerships around the world. Each year, thousands of independently run TEDx events. Through the Audacious Project, TED has helped catalyze $6.6 billion in funding for projects that support bold solutions to the world's most urgent challenges — working to make the world more beautiful, sustainable and just. In 2020, TED launched Countdown, an initiative to accelerate solutions to the climate crisis and mobilize a movement for a net-zero future, and in 2023 TED launched TED Democracy to spark a new kind of conversation focused on realistic pathways towards a more vibrant and equitable future. <a href="https://www.ted.com/about/programs-initiatives" target="_blank" rel="noopener noreferrer" className="text-ted-red hover:underline">View a full list of TED’s many programs and initiatives</a>.
                 </p>
               </div>
             </div>
 
             <div className="max-w-4xl mx-auto space-y-8 bg-white/5 p-12 rounded-3xl border border-white/10">
-              <p className="text-gray-400 leading-relaxed">
-                TED began in 1984 as a conference where Technology, Entertainment and Design converged, but today it spans a multitude of worldwide communities and initiatives exploring everything from science and business to education, arts and global issues. In addition to the TED Talks curated from our annual conferences and published on TED.com, we produce original podcasts, short video series, animated educational lessons (TED-Ed) and TV programs that are translated into more than 100 languages and distributed via partnerships around the world. Each year, thousands of independently run TEDx events. Through the Audacious Project, TED has helped catalyze $6.6 billion in funding for projects that support bold solutions to the world's most urgent challenges — working to make the world more beautiful, sustainable and just. In 2020, TED launched Countdown, an initiative to accelerate solutions to the climate crisis and mobilize a movement for a net-zero future, and in 2023 TED launched TED Democracy to spark a new kind of conversation focused on realistic pathways towards a more vibrant and equitable future. 
-              </p>
-              <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex gap-4">
-                  {['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'X'].map((platform) => (
-                    <a key={platform} href="#" className="text-xs uppercase tracking-widest font-bold hover:text-[#E62B1E] transition-colors">{platform}</a>
-                  ))}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs uppercase tracking-widest font-bold text-gray-500">Follow TED on:</span>
+                  <div className="flex gap-4">
+                    <a href="https://www.facebook.com/TED" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold hover:text-ted-red transition-colors">Facebook</a>
+                    <a href="https://www.instagram.com/ted" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold hover:text-ted-red transition-colors">Instagram</a>
+                    <a href="https://www.linkedin.com/company/ted-conferences" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold hover:text-ted-red transition-colors">LinkedIn</a>
+                    <a href="https://www.tiktok.com/@tedtoks" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold hover:text-ted-red transition-colors">TikTok</a>
+                    <a href="https://twitter.com/TEDTalks" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold hover:text-ted-red transition-colors">X</a>
+                  </div>
                 </div>
-                <a href="https://www.ted.com" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold text-[#E62B1E] hover:text-white transition-colors">
-                  View a full list of TED’s many programs →
-                </a>
               </div>
             </div>
           </div>

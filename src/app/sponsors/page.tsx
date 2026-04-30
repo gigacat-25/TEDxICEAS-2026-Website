@@ -54,18 +54,25 @@ export default async function SponsorsPage() {
                 <div key={i} className="text-center">
                   <h2 className="text-2xl font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">{tierName} Partners</h2>
                   <div className="flex flex-wrap justify-center gap-12 md:gap-20">
-                    {tiers[tierName].map((sponsor: any, j: number) => (
-                      <div key={j} className="group relative w-48 md:w-64">
-                        <div className="aspect-[2/1] bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center p-8 group-hover:border-[#E62B1E]/50 group-hover:bg-white/10 transition-all duration-500">
-                          <img 
-                            src={sponsor.logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${sponsor.name}`} 
-                            alt={sponsor.name}
-                            className="w-full h-auto opacity-50 group-hover:opacity-100 transition-opacity duration-500 filter invert grayscale group-hover:grayscale-0 group-hover:invert-0"
-                          />
+                    {tiers[tierName].map((sponsor: any, j: number) => {
+                      let sizeClass = "w-48 md:w-64";
+                      if (tierName.toLowerCase() === "platinum") sizeClass = "w-64 md:w-80";
+                      else if (tierName.toLowerCase() === "gold") sizeClass = "w-56 md:w-72";
+                      else if (tierName.toLowerCase() === "silver") sizeClass = "w-52 md:w-68";
+                      
+                      return (
+                        <div key={j} className={`group relative ${sizeClass}`}>
+                          <div className="aspect-[2/1] bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center p-8 group-hover:border-[#E62B1E]/50 group-hover:bg-white/10 transition-all duration-500">
+                            <img 
+                              src={sponsor.logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${sponsor.name}`} 
+                              alt={sponsor.name}
+                              className="w-full h-auto opacity-50 group-hover:opacity-100 transition-opacity duration-500 filter invert grayscale group-hover:grayscale-0 group-hover:invert-0 object-contain max-h-[100px]"
+                            />
+                          </div>
+                          <p className="mt-4 text-sm text-gray-500 group-hover:text-white transition-colors">{sponsor.name}</p>
                         </div>
-                        <p className="mt-4 text-sm text-gray-500 group-hover:text-white transition-colors">{sponsor.name}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))

@@ -5,7 +5,11 @@ export default function Footer() {
     <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 text-white/20">
         <div className="space-y-4">
-          <h3 className="text-2xl font-black text-white italic">TEDx<span className="text-ted-red">ICEAS</span></h3>
+          <img 
+            src="/logo-white.png" 
+            alt="TEDxICEAS Logo" 
+            className="h-8 md:h-10 opacity-80 hover:opacity-100 transition-opacity" 
+          />
           <p className="text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
             This independent TEDx event is operated under license from TED.
           </p>
