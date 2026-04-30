@@ -2,9 +2,13 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
+import { UserButton, useUser, useAuth } from "@clerk/nextjs";
+
 export default function Navbar() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const { isSignedIn } = useUser();
+    const { userId } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -19,6 +23,12 @@ export default function Navbar() {
         { label: "Team", href: "/team" },
         { label: "About", href: "/about" },
     ];
+
+    if (isSignedIn) {
+        links.push({ label: "Dashboard", href: "/dashboard" });
+    }
+
+    const ticketHref = isSignedIn ? "/dashboard" : "/sign-in";
 
     return (
         <header
@@ -51,11 +61,12 @@ export default function Navbar() {
                     </Link>
                 ))}
                 <Link
-                    href="/#register"
+                    href={ticketHref}
                     className="text-[0.65rem] font-bold uppercase tracking-[0.2em] px-8 py-3 bg-ted-red hover:bg-white hover:text-ted-red text-white transition-all duration-300"
                 >
                     Tickets
                 </Link>
+                {isSignedIn && <UserButton afterSignOutUrl="/" />}
             </nav>
 
             {/* Mobile Trigger */}
@@ -88,12 +99,17 @@ export default function Navbar() {
                     </Link>
                 ))}
                 <Link
-                    href="/#register"
+                    href={ticketHref}
                     onClick={() => setOpen(false)}
                     className="mt-4 text-center bg-ted-red text-white py-5 font-bold uppercase tracking-widest text-xs"
                 >
                     Get Tickets
                 </Link>
+                {isSignedIn && (
+                    <div className="flex justify-center mt-4">
+                        <UserButton afterSignOutUrl="/" />
+                    </div>
+                )}
             </div>
         </header>
     );

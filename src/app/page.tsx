@@ -1,57 +1,51 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { getSpeakers } from "@/app/actions/speakers";
+import { getSponsors } from "@/app/actions/sponsors";
 
-const speakers = [
-  { name: "Dr. M A Saleem IPS", role: "Director General of Police, CID Karnataka" },
-  { name: "Karen Vincent", role: "Standup Comedian · Entertainer · Influencer" },
-  { name: "Jonathan Thomas Jai", role: "Journalist · Writer" },
-  { name: "Rida Khan", role: "Content Creator" },
-  { name: "Prahalad Kulkarni", role: "Former Indian Air Force Veteran" },
-  { name: "Tezashwani Tomar", role: "Senior Brand Manager" },
-  { name: "Dr. Bharat Bylappa", role: "Founder of Bharat Groups" },
-  { name: "Dr. Alice Abraham", role: "Entrepreneur" },
-  { name: "Prof. Ar. Vasanth K. Bhat", role: "Director, Impact School of Architecture" },
-  { name: "Pramodh Chandrashekar", role: "Founder of Coincontra" },
-];
+export default async function Home() {
+  let speakers: any[] = [];
+  let sponsors: any[] = [];
 
-const schedule = [
-  { time: "09:00 – 09:45", event: "Registration" },
-  { time: "09:45 – 10:10", event: "Opening Ceremony" },
-  { time: "10:10 – 10:15", event: "Invocation Song" },
-  { time: "10:15 – 10:20", event: "Lighting of the Lamp" },
-  { time: "10:20 – 10:35", event: "Welcome · TEDx Video & Theme" },
-  { time: "10:35 – 11:00", event: "Dr. Alice Abraham" },
-  { time: "11:00 – 11:25", event: "Dr. M A Saleem" },
-  { time: "11:25 – 11:50", event: "Dr. Bharath Bylappa" },
-  { time: "11:50 – 12:05", event: "Short Break" },
-  { time: "12:05 – 12:15", event: "Classical Dance Performance" },
-  { time: "12:15 – 12:50", event: "Rida Khan" },
-  { time: "12:50 – 01:15", event: "Prahalad Kulkarni" },
-  { time: "01:15 – 02:15", event: "Lunch" },
-  { time: "02:20 – 02:50", event: "Pramod Chandrashekar" },
-  { time: "02:50 – 03:20", event: "Jonathan Thomas Jai" },
-  { time: "03:20 – 03:30", event: "Magic Show" },
-  { time: "03:30 – 04:00", event: "Tezashwani Tomar" },
-  { time: "04:00 – 04:30", event: "Prof. Ar. Vasanth K. Bhat" },
-  { time: "04:30 – 05:00", event: "Karen Vincent" },
-  { time: "05:00 – 05:20", event: "Tea Break" },
-  { time: "05:20 – 05:25", event: "Vote of Thanks" },
-  { time: "05:25 onwards", event: "Band Performance" },
-];
+  try {
+    speakers = await getSpeakers();
+    sponsors = await getSponsors();
+  } catch (error) {
+    console.error("Failed to fetch dynamic content:", error);
+    // In local dev, DB might not be bound. We could fallback to mock data or empty.
+  }
 
-export default function Home() {
+  const schedule = [
+    { time: "09:00 – 09:45", event: "Registration" },
+    { time: "09:45 – 10:10", event: "Opening Ceremony" },
+    { time: "10:10 – 10:15", event: "Invocation Song" },
+    { time: "10:15 – 10:20", event: "Lighting of the Lamp" },
+    { time: "10:20 – 10:35", event: "Welcome · TEDx Video & Theme" },
+    { time: "10:35 – 11:00", event: "Dr. Alice Abraham" },
+    { time: "11:00 – 11:25", event: "Dr. M A Saleem" },
+    { time: "11:25 – 11:50", event: "Dr. Bharath Bylappa" },
+    { time: "11:50 – 12:05", event: "Short Break" },
+    { time: "12:05 – 12:15", event: "Classical Dance Performance" },
+    { time: "12:15 – 12:50", event: "Rida Khan" },
+    { time: "12:50 – 01:15", event: "Prahalad Kulkarni" },
+    { time: "01:15 – 02:15", event: "Lunch" },
+    { time: "02:20 – 02:50", event: "Pramod Chandrashekar" },
+    { time: "02:50 – 03:20", event: "Jonathan Thomas Jai" },
+    { time: "03:20 – 03:30", event: "Magic Show" },
+    { time: "03:30 – 04:00", event: "Tezashwani Tomar" },
+    { time: "04:00 – 04:30", event: "Prof. Ar. Vasanth K. Bhat" },
+    { time: "04:30 – 05:00", event: "Karen Vincent" },
+    { time: "05:00 – 05:20", event: "Tea Break" },
+    { time: "05:20 – 05:25", event: "Vote of Thanks" },
+    { time: "05:25 onwards", event: "Band Performance" },
+  ];
+
   return (
     <div className="relative min-h-screen text-[#f0f0f0]">
-
-      {/* Navigation */}
       <Navbar />
-
-      {/* Content Layer */}
       <main className="relative z-10">
-
-        {/* ── HERO SECTION ── */}
+        {/* HERO SECTION */}
         <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 text-center select-none pt-10">
-            {/* Static Hero Title */}
             <div className="space-y-4 mb-8">
               <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 TEDx<span className="text-[#E62B1E]">ICEAS</span>
@@ -60,13 +54,9 @@ export default function Home() {
                 Threads of Change
               </p>
             </div>
-
-            {/* Date */}
             <p className="text-lg md:text-2xl font-medium text-white/80 italic animate-in fade-in duration-1000 delay-400">
               April 17th 2025
             </p>
-
-            {/* CTA Button */}
             <div className="pt-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
               <Link
                 href="/#register"
@@ -75,14 +65,12 @@ export default function Home() {
                 Get Tickets
               </Link>
             </div>
-
-          {/* Scroll cue */}
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20">
             <div className="w-[1px] h-12 bg-white animate-pulse" />
           </div>
         </section>
 
-        {/* ── THEME SECTION ── */}
+        {/* THEME SECTION */}
         <section id="about" className="min-h-screen flex flex-col justify-center px-6 md:px-20 lg:px-40 py-32 bg-transparent">
           <div className="max-w-6xl mx-auto space-y-20">
             <div className="max-w-4xl space-y-12">
@@ -99,18 +87,15 @@ export default function Home() {
                 </p>
               </div>
             </div>
-
           </div>
         </section>
 
-        {/* ── TEAM SECTION ── */}
+        {/* TEAM SECTION */}
         <section id="team" className="py-24 px-6 md:px-20 lg:px-40 bg-transparent">
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-12">Our Team</h2>
-            
             <div className="relative group max-w-4xl mx-auto mb-12">
               <div className="aspect-[16/9] rounded-[2rem] overflow-hidden border border-[#E62B1E]/20 shadow-[0_0_50px_rgba(230,43,30,0.1)]">
-                {/* Replace src with your team photo path */}
                 <img 
                   src="https://via.placeholder.com/1200x675/111/fff?text=TEDxICEAS+Team+Photo" 
                   alt="TEDxICEAS Team"
@@ -118,11 +103,9 @@ export default function Home() {
                 />
               </div>
             </div>
-
             <p className="max-w-5xl mx-auto text-base md:text-lg text-white/90 leading-relaxed mb-10 px-4">
-              The <span className="text-[#E62B1E] font-bold">TEDxICEAS</span> team is composed of dedicated volunteers who are passionate about spreading ideas and creating a TED-like experience in our community. Our team members bring diverse skills and experiences to the table, working collaboratively to make this event a success
+              The <span className="text-[#E62B1E] font-bold">TEDxICEAS</span> team is composed of dedicated volunteers who are passionate about spreading ideas and creating a TED-like experience in our community.
             </p>
-
             <Link 
               href="/team" 
               className="inline-block px-10 py-3 bg-white text-[#E62B1E] font-bold rounded-xl hover:scale-105 transition-all duration-300"
@@ -132,31 +115,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── SPEAKERS SECTION ── */}
+        {/* SPEAKERS SECTION */}
         <section id="speakers" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
           <header className="mb-20 space-y-6">
             <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Global Perspectives</p>
             <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase italic">The Lineup</h2>
           </header>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-12 gap-y-16">
-            {speakers.map((s, i) => (
-              <div key={i} className="group space-y-6 text-center">
-                <div className="aspect-square rounded-full overflow-hidden border border-white/10 group-hover:border-ted-red transition-all duration-500 relative max-w-[200px] mx-auto">
-                  <img 
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${s.name}`} 
-                    alt={s.name}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
-                  />
-                  <div className="absolute inset-0 bg-ted-red/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {speakers.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-12 gap-y-16">
+              {speakers.map((s, i) => (
+                <div key={i} className="group space-y-6 text-center">
+                  <div className="aspect-square rounded-full overflow-hidden border border-white/10 group-hover:border-ted-red transition-all duration-500 relative max-w-[200px] mx-auto">
+                    <img 
+                      src={s.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.name}`} 
+                      alt={s.name}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
+                    />
+                    <div className="absolute inset-0 bg-ted-red/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-white font-bold text-lg md:text-xl leading-tight group-hover:text-ted-red transition-colors">{s.name}</h3>
+                    <p className="text-white/40 text-[0.6rem] uppercase tracking-widest font-medium leading-tight">{s.role}</p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-white font-bold text-lg md:text-xl leading-tight group-hover:text-ted-red transition-colors">{s.name}</h3>
-                  <p className="text-white/40 text-[0.6rem] uppercase tracking-widest font-medium leading-tight">{s.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-white/20">
+              Speaker lineup coming soon.
+            </div>
+          )}
           
           <div className="mt-20 text-center">
              <Link href="/speakers" className="inline-block border border-white/20 px-12 py-5 text-[0.7rem] uppercase tracking-[0.4em] font-black hover:bg-white hover:text-charcoal transition-all">
@@ -165,14 +154,30 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── SCHEDULE SECTION ── */}
+        {/* SPONSORS SECTION */}
+        {sponsors.length > 0 && (
+          <section id="sponsors" className="py-32 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
+            <header className="mb-20 space-y-6 text-center">
+              <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Partners</p>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white uppercase italic">Our Sponsors</h2>
+            </header>
+            <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
+              {sponsors.map((sponsor, i) => (
+                <a key={i} href={sponsor.websiteUrl || "#"} target="_blank" rel="noopener noreferrer">
+                  <img src={sponsor.logoUrl} alt={sponsor.name} className="h-12 md:h-16 w-auto object-contain" />
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SCHEDULE SECTION */}
         <section id="schedule" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-transparent">
           <div className="max-w-5xl">
             <header className="mb-24 space-y-6 text-center md:text-left">
               <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Program</p>
               <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white uppercase italic">Timeline</h2>
             </header>
-
             <div className="divide-y divide-white/5">
               {schedule.map((item, i) => (
                 <div key={i} className="group py-12 flex flex-col md:flex-row md:items-baseline gap-6 md:gap-16 hover:bg-white/[0.02] transition-colors relative overflow-hidden px-4">
@@ -187,9 +192,7 @@ export default function Home() {
           </div>
         </section>
 
-
-
-        {/* ── VENUE & REGISTRATION ── */}
+        {/* VENUE & REGISTRATION */}
         <section id="register" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 flex flex-col justify-center bg-transparent">
           <div className="grid lg:grid-cols-2 gap-20 items-end">
             <div className="space-y-10">
@@ -202,23 +205,16 @@ export default function Home() {
                   <span className="text-white font-bold block mb-2 text-2xl uppercase tracking-tighter italic">Impact College of Engineering</span>
                   Sahakar Nagar, Bengaluru, Karnataka 560092
                 </p>
-                <p className="text-base text-white/30 max-w-sm tracking-wide">
-                  Join us at our tech-forward campus for an immersive day of cinematic talks and groundbreaking innovation.
-                </p>
               </div>
             </div>
-
             <div className="bg-ted-red p-12 md:p-20 rounded-sm space-y-10 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-10">
                 <span className="text-9xl font-black tracking-tighter">TEDx</span>
               </div>
-              <div className="space-y-6 relative z-10">
-                <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none">SECURE YOUR SEAT.</h3>
-                <p className="text-white/80 text-lg leading-relaxed font-medium">Limited spots available for the 2026 flagship event. Experience the viral energy live.</p>
-              </div>
+              <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none relative z-10">SECURE YOUR SEAT.</h3>
               <a href="#" className="relative z-10 flex items-center justify-between group bg-white px-10 py-6 text-ted-red font-black uppercase tracking-widest text-sm hover:translate-x-4 transition-all duration-300">
                 Register Now
-                <span className="group-hover:translate-x-2 transition-transform">→</span>
+                <span>→</span>
               </a>
             </div>
           </div>
@@ -226,27 +222,19 @@ export default function Home() {
       </main>
 
       <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12 text-white/20">
           <div className="space-y-4">
-            <div className="h-10 md:h-12 w-fit">
-              <img
-                src="/logo-white.png"
-                alt="TEDxICEAS Logo"
-                className="h-full w-auto object-contain"
-              />
-            </div>
-            <p className="text-white/20 text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
+            <h3 className="text-2xl font-black text-white italic">TEDx<span className="text-ted-red">ICEAS</span></h3>
+            <p className="text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
               This independent TEDx event is operated under license from TED.
             </p>
           </div>
           <div className="flex flex-wrap gap-x-20 gap-y-8">
-            {['Facebook', 'Instagram', 'LinkedIn', 'Twitter'].map(s => (
-              <a key={s} href="#" className="text-[0.65rem] uppercase tracking-widest font-bold text-white/40 hover:text-white transition-colors">{s}</a>
+            {['Instagram', 'LinkedIn', 'Twitter'].map(s => (
+              <a key={s} href="#" className="text-[0.65rem] uppercase tracking-widest font-bold hover:text-white transition-colors">{s}</a>
             ))}
           </div>
-          <div className="text-right">
-            <p className="text-white/10 text-[0.6rem] uppercase tracking-[0.4em]">&copy; 2026 All Rights Reserved</p>
-          </div>
+          <p className="text-[0.6rem] uppercase tracking-[0.4em]">&copy; 2026 All Rights Reserved</p>
         </div>
       </footer>
     </div>

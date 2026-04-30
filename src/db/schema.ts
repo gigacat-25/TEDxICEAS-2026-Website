@@ -29,3 +29,12 @@ export const sponsors = sqliteTable('sponsors', {
   displayOrder: integer('display_order').default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+export const tickets = sqliteTable('tickets', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(), // Clerk User ID
+  userEmail: text('user_email').notNull(),
+  ticketType: text('ticket_type').notNull().default('general'), // 'general', 'vip', 'student'
+  status: text('status').notNull().default('pending'), // 'pending', 'confirmed', 'cancelled'
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
