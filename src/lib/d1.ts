@@ -10,13 +10,20 @@ export async function d1<T = Record<string, unknown>>(
   const databaseId = process.env.CLOUDFLARE_DATABASE_ID;
   const token = process.env.CLOUDFLARE_D1_TOKEN;
 
+  // Build-time safety: If we are in the Next.js build phase and credentials 
+  // are missing or invalid, return an empty array instead of crashing the build.
   if (!accountId || !databaseId || !token) {
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production') {
+      console.warn('D1: Skipping fetch due to missing credentials (likely build phase)');
+      return [] as T[];
+    }
     throw new Error(
       'Missing Cloudflare env vars: CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_D1_TOKEN'
     );
   }
 
-  const res = await fetch(
+  try {
+    const res = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`,
     {
       method: 'POST',
@@ -36,6 +43,13 @@ export async function d1<T = Record<string, unknown>>(
   }
 
   return (json.result?.[0]?.results ?? []) as T[];
+  } catch (error) {
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('D1: Fetch failed during build, ignoring:', error);
+      return [] as T[];
+    }
+    throw error;
+  }
 }
 
 /** Convenience wrapper for mutations (INSERT / UPDATE / DELETE). */
