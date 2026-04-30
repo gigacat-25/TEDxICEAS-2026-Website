@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { v4 as uuidv4 } from 'uuid';
-// fs and path removed for Edge runtime compatibility
+import { getR2 } from '@/db';
+
 export const runtime = "edge";
+
 export async function POST(req: Request) {
   try {
     // Basic auth check
@@ -23,8 +25,6 @@ export async function POST(req: Request) {
     
     // Try R2 (Production / Cloudflare)
     try {
-      // In production/Cloudflare environment, getR2() works
-      const { getR2 } = require('@/db');
       const R2 = getR2();
       
       await R2.put(uniqueFilename, buffer, {
@@ -33,20 +33,20 @@ export async function POST(req: Request) {
       
       const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${uniqueFilename}`;
       return NextResponse.json({ url: publicUrl });
-    } catch (r2Error) {
+    } catch (r2Error: any) {
       // Local development fallback
       if (process.env.NODE_ENV === 'development') {
         console.log(`[LOCAL_UPLOAD_MOCK] Pretending to save ${uniqueFilename}`);
         return NextResponse.json({ 
           url: `/uploads/${uniqueFilename}`,
-          warning: "Saved to local mock storage (fs removed for Edge runtime compatibility)"
+          warning: "Saved to local mock storage (R2 is only active on Cloudflare Pages)"
         });
       }
       
       console.warn("R2 upload failed or not available:", r2Error);
       return NextResponse.json({ 
         url: `https://mock.url/${uniqueFilename}`,
-        warning: "Running in mock mode. R2 is only active on Cloudflare Pages."
+        warning: `Running in mock mode. Error: ${r2Error.message}`
       });
     }
   } catch (error) {

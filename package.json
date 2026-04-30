@@ -14,16 +14,12 @@
     "preview": "npm run pages:build && wrangler pages dev .vercel/output/static"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1038.0",
     "@clerk/nextjs": "^7.2.8",
-    "@types/nodemailer": "^8.0.0",
     "@types/three": "^0.184.0",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
-    "googleapis": "^171.4.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.4",
-    "nodemailer": "^8.0.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.184.0",

@@ -6,12 +6,23 @@ export async function d1<T = Record<string, unknown>>(
   sql: string,
   params: unknown[] = []
 ): Promise<T[]> {
+  // Try native Cloudflare D1 binding first
+  try {
+    const { getRequestContext } = require('@cloudflare/next-on-pages');
+    const { env } = getRequestContext();
+    const nativeDb = (env as any)?.DB;
+    if (nativeDb) {
+      const result = await nativeDb.prepare(sql).bind(...params).all();
+      return (result.results ?? []) as T[];
+    }
+  } catch {
+    // fallback to HTTP API
+  }
+
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const databaseId = process.env.CLOUDFLARE_DATABASE_ID;
   const token = process.env.CLOUDFLARE_D1_TOKEN;
 
-  // Build-time safety: If we are in the Next.js build phase and credentials 
-  // are missing or invalid, return an empty array instead of crashing the build.
   if (!accountId || !databaseId || !token) {
     if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production') {
       console.warn('D1: Skipping fetch due to missing credentials (likely build phase)');
