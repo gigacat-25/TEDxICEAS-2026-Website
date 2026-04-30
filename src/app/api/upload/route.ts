@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { v4 as uuidv4 } from 'uuid';
 import { getR2 } from '@/db';
 
-export const runtime = "edge";
+export const runtime = "experimental-edge";
 
 export async function POST(req: Request) {
   try {

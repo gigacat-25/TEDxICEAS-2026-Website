@@ -10,7 +10,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export const runtime = "edge";
+export const runtime = "experimental-edge";
 
 export const metadata: Metadata = {
   title: "TEDx ICEAS 2026 | Threads of Change",
