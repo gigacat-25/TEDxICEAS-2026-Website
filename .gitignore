@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+/.tmp
 
 # debug
 npm-debug.log*
@@ -42,3 +43,6 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# local uploads
+/public/uploads

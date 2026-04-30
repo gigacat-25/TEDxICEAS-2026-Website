@@ -1,10 +1,40 @@
 "use server";
 
-import { getDb } from "@/db";
-import { speakers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { d1, d1run } from "@/lib/d1";
 import { v4 as uuidv4 } from "uuid";
 import { revalidatePath } from "next/cache";
+import { isAdmin } from "@/lib/admin";
+import { currentUser } from "@clerk/nextjs/server";
+
+interface Speaker {
+  id: string;
+  name: string;
+  role: string;
+  bio: string | null;
+  imageUrl: string | null;
+  displayOrder: number;
+}
+
+export async function getSpeakers(): Promise<Speaker[]> {
+  return d1<Speaker>(`
+    SELECT id, name, role, bio,
+           image_url    AS imageUrl,
+           display_order AS displayOrder
+    FROM speakers
+    ORDER BY display_order ASC
+  `);
+}
+
+export async function getSpeakerById(id: string): Promise<Speaker | null> {
+  const rows = await d1<Speaker>(
+    `SELECT id, name, role, bio,
+            image_url    AS imageUrl,
+            display_order AS displayOrder
+     FROM speakers WHERE id = ?`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
 
 export async function createSpeaker(data: {
   name: string;
@@ -12,65 +42,54 @@ export async function createSpeaker(data: {
   bio?: string;
   imageUrl?: string;
 }) {
-  const db = getDb();
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
+
+  const rows = await d1<{ maxOrder: number }>(
+    `SELECT COALESCE(MAX(display_order), -1) AS maxOrder FROM speakers`
+  );
+  const maxOrder = rows[0]?.maxOrder ?? -1;
+
   const id = uuidv4();
-
-  // Get the current max display order
-  const allSpeakers = await db.select().from(speakers);
-  const maxOrder = allSpeakers.reduce((max, s) => Math.max(max, s.displayOrder || 0), -1);
-
-  await db.insert(speakers).values({
-    id,
-    name: data.name,
-    role: data.role,
-    bio: data.bio,
-    imageUrl: data.imageUrl,
-    displayOrder: maxOrder + 1,
-  });
+  await d1run(
+    `INSERT INTO speakers (id, name, role, bio, image_url, display_order, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.name, data.role, data.bio ?? null, data.imageUrl ?? null, maxOrder + 1, Date.now()]
+  );
 
   revalidatePath("/admin/speakers");
-  revalidatePath("/"); // Revalidate home page where speakers are shown
+  revalidatePath("/");
   return { success: true, id };
 }
 
+export async function updateSpeaker(
+  id: string,
+  data: { name: string; role: string; bio?: string; imageUrl?: string; displayOrder?: number }
+) {
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
+
+  await d1run(
+    `UPDATE speakers
+     SET name = ?, role = ?, bio = ?,
+         image_url = COALESCE(?, image_url),
+         display_order = COALESCE(?, display_order)
+     WHERE id = ?`,
+    [data.name, data.role, data.bio ?? null, data.imageUrl ?? null, data.displayOrder ?? null, id]
+  );
+
+  revalidatePath("/admin/speakers");
+  revalidatePath("/");
+  return { success: true };
+}
+
 export async function deleteSpeaker(id: string) {
-  const db = getDb();
-  await db.delete(speakers).where(eq(speakers.id, id));
-  
-  revalidatePath("/admin/speakers");
-  revalidatePath("/");
-  return { success: true };
-}
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
 
-export async function getSpeakers() {
-  const db = getDb();
-  return await db.select().from(speakers).orderBy(speakers.displayOrder);
-}
-
-export async function getSpeakerById(id: string) {
-  const db = getDb();
-  const result = await db.select().from(speakers).where(eq(speakers.id, id));
-  return result[0] || null;
-}
-
-export async function updateSpeaker(id: string, data: {
-  name: string;
-  role: string;
-  bio?: string;
-  imageUrl?: string;
-  displayOrder?: number;
-}) {
-  const db = getDb();
-  await db.update(speakers).set({
-    name: data.name,
-    role: data.role,
-    bio: data.bio,
-    ...(data.imageUrl ? { imageUrl: data.imageUrl } : {}),
-    ...(data.displayOrder !== undefined ? { displayOrder: data.displayOrder } : {}),
-  }).where(eq(speakers.id, id));
+  await d1run(`DELETE FROM speakers WHERE id = ?`, [id]);
 
   revalidatePath("/admin/speakers");
   revalidatePath("/");
   return { success: true };
 }
-

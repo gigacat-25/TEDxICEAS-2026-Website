@@ -1,0 +1,35 @@
+Create your website
+Here are the basics when it comes to creating your website:
+
+Homepage
+In addition to general info about your event, your site's homepage is required include the following:
+
+Language that describes TEDx with a link to the TEDx program:
+What is TEDx?
+In the spirit of discovering and spreading ideas, TED has created a program called TEDx. TEDx is a program of local, self-organized events that bring people together to share a TED-like experience. Our event is called TEDx[name], where x = independently organized TED event. At our TEDx[name] event, TED Talks video and live speakers will combine to spark deep discussion and connection in a small group. The TED Conference provides general guidance for the TEDx program, but individual TEDx events, including ours, are self-organized.
+
+Text in the footer (at the bottom of the site) that states "This independent TEDx event is operated under license from TED."
+About page
+Create an About TED/About TEDx tab that includes the following text:
+
+About TEDx, x = independently organized event
+In the spirit of discovering and spreading ideas, TEDx is a program of local, self-organized events that bring people together to share a TED-like experience. At a TEDx event, TED Talks video and live speakers combine to spark deep discussion and connection. These local, self-organized events are branded TEDx, where x = independently organized TED event. The TED Conference provides general guidance for the TEDx program, but individual TEDx events are self-organized. (Subject to certain rules and regulations.)
+
+About TED
+
+TED is a nonprofit, nonpartisan organization dedicated to discovering, debating and spreading ideas that spark conversation, deepen understanding and drive meaningful change. Our organization is devoted to curiosity, reason, wonder and the pursuit of knowledge — without an agenda. We welcome people from every discipline and culture who seek a deeper understanding of the world and connection with others, and we invite everyone to engage with ideas and activate them in your community.
+
+TED began in 1984 as a conference where Technology, Entertainment and Design converged, but today it spans a multitude of worldwide communities and initiatives exploring everything from science and business to education, arts and global issues. In addition to the TED Talks curated from our annual conferences and published on TED.com, we produce original podcasts, short video series, animated educational lessons (TED-Ed) and TV programs that are translated into more than 100 languages and distributed via partnerships around the world. Each year, thousands of independently run TEDx events. Through the Audacious Project, TED has helped catalyze $6.6 billion in funding for projects that support bold solutions to the world's most urgent challenges — working to make the world more beautiful, sustainable and just. In 2020, TED launched Countdown, an initiative to accelerate solutions to the climate crisis and mobilize a movement for a net-zero future, and in 2023 TED launched TED Democracy to spark a new kind of conversation focused on realistic pathways towards a more vibrant and equitable future. View a full list of TED’s many programs and initiatives.
+
+Follow TED on Facebook, Instagram, LinkedIn, TikTok, and X.
+
+Website content
+Naturally, your website should include general information about your event, including:
+
+The event name, date and theme
+The event venue and city
+Names and backgrounds of you and your TEDx team
+A list of the local speakers and performers
+The session schedule (when it’s available)
+A separate page thanking sponsors (Sponsors can't be thanked on the homepage)
+You’ll also want to integrate other fun elements, like links to the event’s social media accounts, a blog, an email sign up form, and other promotional items we’ll talk about in the following pages.

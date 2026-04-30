@@ -3,12 +3,15 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
+import { ADMIN_EMAIL } from "@/lib/admin";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const { isSignedIn } = useUser();
+    const { isSignedIn, user } = useUser();
     const { userId } = useAuth();
+
+    const isAdminUser = user?.primaryEmailAddress?.emailAddress?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -26,6 +29,10 @@ export default function Navbar() {
 
     if (isSignedIn) {
         links.push({ label: "Dashboard", href: "/dashboard" });
+    }
+
+    if (isAdminUser) {
+        links.push({ label: "Admin Panel", href: "/admin" });
     }
 
     const ticketHref = isSignedIn ? "/dashboard" : "/sign-in";
@@ -66,7 +73,7 @@ export default function Navbar() {
                 >
                     Tickets
                 </Link>
-                {isSignedIn && <UserButton afterSignOutUrl="/" />}
+                {isSignedIn && <UserButton />}
             </nav>
 
             {/* Mobile Trigger */}
@@ -107,7 +114,7 @@ export default function Navbar() {
                 </Link>
                 {isSignedIn && (
                     <div className="flex justify-center mt-4">
-                        <UserButton afterSignOutUrl="/" />
+                        <UserButton />
                     </div>
                 )}
             </div>

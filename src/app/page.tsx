@@ -1,44 +1,24 @@
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import Link from "next/link";
 import { getSpeakers } from "@/app/actions/speakers";
 import { getSponsors } from "@/app/actions/sponsors";
+import { getSchedule } from "@/app/actions/schedule";
 
 export default async function Home() {
   let speakers: any[] = [];
   let sponsors: any[] = [];
 
+  let schedule: any[] = [];
+
   try {
     speakers = await getSpeakers();
     sponsors = await getSponsors();
+    schedule = await getSchedule();
   } catch (error) {
     console.error("Failed to fetch dynamic content:", error);
     // In local dev, DB might not be bound. We could fallback to mock data or empty.
   }
-
-  const schedule = [
-    { time: "09:00 – 09:45", event: "Registration" },
-    { time: "09:45 – 10:10", event: "Opening Ceremony" },
-    { time: "10:10 – 10:15", event: "Invocation Song" },
-    { time: "10:15 – 10:20", event: "Lighting of the Lamp" },
-    { time: "10:20 – 10:35", event: "Welcome · TEDx Video & Theme" },
-    { time: "10:35 – 11:00", event: "Dr. Alice Abraham" },
-    { time: "11:00 – 11:25", event: "Dr. M A Saleem" },
-    { time: "11:25 – 11:50", event: "Dr. Bharath Bylappa" },
-    { time: "11:50 – 12:05", event: "Short Break" },
-    { time: "12:05 – 12:15", event: "Classical Dance Performance" },
-    { time: "12:15 – 12:50", event: "Rida Khan" },
-    { time: "12:50 – 01:15", event: "Prahalad Kulkarni" },
-    { time: "01:15 – 02:15", event: "Lunch" },
-    { time: "02:20 – 02:50", event: "Pramod Chandrashekar" },
-    { time: "02:50 – 03:20", event: "Jonathan Thomas Jai" },
-    { time: "03:20 – 03:30", event: "Magic Show" },
-    { time: "03:30 – 04:00", event: "Tezashwani Tomar" },
-    { time: "04:00 – 04:30", event: "Prof. Ar. Vasanth K. Bhat" },
-    { time: "04:30 – 05:00", event: "Karen Vincent" },
-    { time: "05:00 – 05:20", event: "Tea Break" },
-    { time: "05:20 – 05:25", event: "Vote of Thanks" },
-    { time: "05:25 onwards", event: "Band Performance" },
-  ];
 
   return (
     <div className="relative min-h-screen text-[#f0f0f0]">
@@ -59,7 +39,7 @@ export default async function Home() {
             </p>
             <div className="pt-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
               <Link
-                href="/#register"
+                href="/dashboard"
                 className="inline-block px-12 py-4 bg-white text-[#E62B1E] font-bold rounded-full hover:scale-105 hover:shadow-2xl hover:shadow-white/10 transition-all duration-300 shadow-xl"
               >
                 Get Tickets
@@ -78,13 +58,21 @@ export default async function Home() {
               <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">
                 Unraveling the <br className="hidden md:block" /> tapestry of <span className="text-ted-red italic">ideas</span>.
               </h2>
-              <div className="grid md:grid-cols-2 gap-12 pt-8">
-                <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
-                  In the spirit of discovering and spreading ideas, TED has created TEDx — local, self-organized events that bring people together to share a TED-like experience.
-                </p>
-                <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
-                  At <strong className="text-white font-medium">TEDxICEAS</strong>, live speakers and TED Talks videos combine to spark deep discussion. Our 2026 theme, "Threads of Change", explores the forces, stories, and ideas that define our future.
-                </p>
+              <div className="grid md:grid-cols-1 gap-12 pt-8">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-white uppercase italic tracking-tighter">What is TEDx?</h3>
+                  <p className="text-lg md:text-xl text-white/50 leading-relaxed font-light">
+                    In the spirit of discovering and spreading ideas, TED has created a program called TEDx. TEDx is a program of local, self-organized events that bring people together to share a TED-like experience. Our event is called TEDxICEAS, where x = independently organized TED event. At our TEDxICEAS event, TED Talks video and live speakers will combine to spark deep discussion and connection in a small group. The TED Conference provides general guidance for the TEDx program, but individual TEDx events, including ours, are self-organized.
+                  </p>
+                  <a 
+                    href="https://www.ted.com/about/programs-initiatives/tedx-program" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block text-ted-red hover:text-white transition-colors font-bold uppercase tracking-widest text-xs border-b border-ted-red pb-1"
+                  >
+                    Learn more about the TEDx program
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -154,22 +142,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* SPONSORS SECTION */}
-        {sponsors.length > 0 && (
-          <section id="sponsors" className="py-32 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
-            <header className="mb-20 space-y-6 text-center">
-              <p className="text-[0.65rem] uppercase tracking-[0.35em] text-ted-red font-bold">Partners</p>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white uppercase italic">Our Sponsors</h2>
-            </header>
-            <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
-              {sponsors.map((sponsor, i) => (
-                <a key={i} href={sponsor.websiteUrl || "#"} target="_blank" rel="noopener noreferrer">
-                  <img src={sponsor.logoUrl} alt={sponsor.name} className="h-12 md:h-16 w-auto object-contain" />
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
+
 
         {/* SCHEDULE SECTION */}
         <section id="schedule" className="min-h-screen py-32 px-6 md:px-20 lg:px-40 bg-transparent">
@@ -180,7 +153,7 @@ export default async function Home() {
             </header>
             <div className="divide-y divide-white/5">
               {schedule.map((item, i) => (
-                <div key={i} className="group py-12 flex flex-col md:flex-row md:items-baseline gap-6 md:gap-16 hover:bg-white/[0.02] transition-colors relative overflow-hidden px-4">
+                <div key={item.id || i} className="group py-12 flex flex-col md:flex-row md:items-baseline gap-6 md:gap-16 hover:bg-white/[0.02] transition-colors relative overflow-hidden px-4">
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-ted-red scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-500" />
                   <span className="text-sm font-mono text-ted-red/60 uppercase tracking-tighter shrink-0 md:w-32">{item.time}</span>
                   <span className="text-3xl md:text-5xl font-bold tracking-tighter text-white/80 group-hover:text-white group-hover:translate-x-4 transition-all duration-500 leading-none">
@@ -212,31 +185,15 @@ export default async function Home() {
                 <span className="text-9xl font-black tracking-tighter">TEDx</span>
               </div>
               <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none relative z-10">SECURE YOUR SEAT.</h3>
-              <a href="#" className="relative z-10 flex items-center justify-between group bg-white px-10 py-6 text-ted-red font-black uppercase tracking-widest text-sm hover:translate-x-4 transition-all duration-300">
+              <Link href="/dashboard" className="relative z-10 flex items-center justify-between group bg-white px-10 py-6 text-ted-red font-black uppercase tracking-widest text-sm hover:translate-x-4 transition-all duration-300">
                 Register Now
                 <span>→</span>
-              </a>
+              </Link>
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="relative z-10 py-20 px-6 md:px-20 lg:px-40 bg-transparent border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-12 text-white/20">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-black text-white italic">TEDx<span className="text-ted-red">ICEAS</span></h3>
-            <p className="text-[0.65rem] max-w-[200px] uppercase leading-relaxed tracking-widest">
-              This independent TEDx event is operated under license from TED.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-x-20 gap-y-8">
-            {['Instagram', 'LinkedIn', 'Twitter'].map(s => (
-              <a key={s} href="#" className="text-[0.65rem] uppercase tracking-widest font-bold hover:text-white transition-colors">{s}</a>
-            ))}
-          </div>
-          <p className="text-[0.6rem] uppercase tracking-[0.4em]">&copy; 2026 All Rights Reserved</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

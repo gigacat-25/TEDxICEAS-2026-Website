@@ -1,28 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Edit2, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { getSponsors, deleteSponsor } from "@/app/actions/sponsors";
-import { revalidatePath } from "next/cache";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export default async function SponsorsPage() {
-  let sponsors = [];
+  let sponsors: any[] = [];
+  let error: string | null = null;
   try {
     sponsors = await getSponsors();
-  } catch (error) {
-    console.error("Failed to fetch sponsors:", error);
-  }
-
-  async function handleDelete(id: string) {
-    "use server";
-    await deleteSponsor(id);
-    revalidatePath("/admin/sponsors");
+  } catch (e: any) {
+    console.error("Failed to fetch sponsors:", e);
+    error = e.message || "Unknown error";
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sponsors</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Sponsors</h1>
           <p className="text-muted-foreground mt-2">
             Manage the sponsors and partners for the event.
           </p>
@@ -38,18 +34,23 @@ export default async function SponsorsPage() {
 
       <Card className="bg-black/40 border-white/10">
         <CardHeader>
-          <CardTitle>All Sponsors</CardTitle>
+          <CardTitle className="text-white">All Sponsors</CardTitle>
         </CardHeader>
         <CardContent>
-          {sponsors.length === 0 ? (
+          {error ? (
+            <div className="text-center py-12">
+              <p className="text-ted-red font-bold uppercase tracking-widest text-xs">Database Connection Error</p>
+              <p className="text-white/40 text-[0.65rem] mt-2 font-mono">{error}</p>
+            </div>
+          ) : sponsors.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               No sponsors found. Click "Add Sponsor" to create one.
             </div>
           ) : (
             <div className="grid gap-4">
-              {sponsors.map((sponsor: any) => (
+              {sponsors.map((sponsor: any, index: number) => (
                 <div 
-                  key={sponsor.id} 
+                  key={`${sponsor.id}-${index}`} 
                   className="flex items-center justify-between p-4 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-4">
@@ -65,7 +66,7 @@ export default async function SponsorsPage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold">{sponsor.name}</h3>
+                      <h3 className="font-semibold text-white">{sponsor.name}</h3>
                       <p className="text-sm text-muted-foreground capitalize">{sponsor.tier} Tier</p>
                     </div>
                   </div>
@@ -73,14 +74,11 @@ export default async function SponsorsPage() {
                     <Link href={`/admin/sponsors/${sponsor.id}`} className="p-2 hover:bg-white/10 rounded-md transition-colors text-muted-foreground hover:text-white">
                       <Edit2 className="w-4 h-4" />
                     </Link>
-                    <form action={handleDelete.bind(null, sponsor.id)}>
-                      <button 
-                        type="submit"
-                        className="p-2 hover:bg-red-500/20 rounded-md transition-colors text-muted-foreground hover:text-ted-red"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </form>
+                    <DeleteButton 
+                      id={sponsor.id} 
+                      onDelete={deleteSponsor} 
+                      confirmMessage={`Delete sponsor "${sponsor.name}"?`}
+                    />
                   </div>
                 </div>
               ))}

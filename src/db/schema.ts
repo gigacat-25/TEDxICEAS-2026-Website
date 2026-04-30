@@ -34,7 +34,20 @@ export const tickets = sqliteTable('tickets', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull(), // Clerk User ID
   userEmail: text('user_email').notNull(),
-  ticketType: text('ticket_type').notNull().default('general'), // 'general', 'vip', 'student'
+  ticketType: text('ticket_type').notNull().default('general'), // 'general', 'student'
+  price: integer('price').notNull().default(0),
   status: text('status').notNull().default('pending'), // 'pending', 'confirmed', 'cancelled'
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+export const schedule = sqliteTable('schedule', {
+  id: text('id').primaryKey(),
+  time: text('time').notNull(),
+  event: text('event').notNull(),
+  displayOrder: integer('display_order').default(0),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
 });

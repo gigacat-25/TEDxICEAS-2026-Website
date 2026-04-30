@@ -1,0 +1,1 @@
+ALTER TABLE `tickets` ADD `price` integer DEFAULT 0 NOT NULL;

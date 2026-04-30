@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { getTeamMembers } from "@/app/actions/team";
 
 export default async function TeamPage() {
@@ -101,10 +102,7 @@ export default async function TeamPage() {
           </button>
         </div>
       </section>
-
-      <footer className="py-20 px-6 text-center text-gray-500">
-        <p>© 2026 TEDxICEAS. This independent TEDx event is operated under license from TED.</p>
-      </footer>
+      <Footer />
     </main>
   );
 }

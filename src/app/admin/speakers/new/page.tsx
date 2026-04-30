@@ -46,7 +46,7 @@ export default function NewSpeakerPage() {
         });
 
         if (!response.ok) throw new Error("Upload failed");
-        const { url } = await response.json();
+        const { url } = await response.json() as { url: string };
         imageUrl = url;
       }
 

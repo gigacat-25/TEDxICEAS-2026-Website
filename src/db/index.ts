@@ -1,11 +1,139 @@
+/// <reference types="@cloudflare/workers-types" />
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './schema';
+import { spawnSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Minimal D1 HTTP shim that implements the D1Database interface
  * using the Cloudflare D1 REST API.
  * Used when running local `next dev` (no CF binding available).
  */
+/**
+ * D1 client that uses the wrangler CLI to execute queries.
+ * This bypasses the need for an API token by using the user's
+ * logged-in wrangler session.
+ */
+class WranglerD1Client implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'dump'> {
+  constructor(private databaseName: string) {}
+
+  private async query(sql: string, params: unknown[] = []) {
+    // Interpolate params into SQL (basic escaping for local dev)
+    const parts = sql.split(/\?|\$\d+/);
+    let finalSql = parts[0];
+    
+    for (let i = 0; i < params.length; i++) {
+      const p = params[i];
+      let value = p;
+      if (typeof p === 'string') {
+        value = `'${p.replace(/'/g, "''")}'`;
+      } else if (p instanceof Date) {
+        value = `'${p.toISOString()}'`;
+      } else if (p === null || p === undefined) {
+        value = 'NULL';
+      } else if (typeof p === 'boolean') {
+        value = p ? '1' : '0';
+      }
+      
+      finalSql += String(value) + (parts[i + 1] || '');
+    }
+
+    try {
+      // Use a temporary file to avoid all shell quoting issues on Windows/Linux
+      const tempDir = path.join(process.cwd(), '.tmp');
+      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+      
+      const tempFile = path.join(tempDir, `query-${Date.now()}-${Math.random().toString(36).slice(2)}.sql`);
+      fs.writeFileSync(tempFile, finalSql);
+
+      try {
+        const args = ['wrangler', 'd1', 'execute', this.databaseName, '--remote', '--json', '--file', tempFile];
+        
+        const result = spawnSync('npx', args, { 
+          encoding: 'utf-8', 
+          shell: process.platform === 'win32' 
+        });
+
+        if (result.status !== 0) {
+          const errorMsg = result.stderr || result.stdout || 'Wrangler command failed';
+          throw new Error(errorMsg);
+        }
+        
+        // Robustly find the JSON part in the output (ignoring progress bars, etc.)
+        const stdout = result.stdout;
+        const jsonStartIndex = stdout.indexOf('[');
+        const jsonEndIndex = stdout.lastIndexOf(']') + 1;
+        
+        if (jsonStartIndex === -1 || jsonEndIndex <= jsonStartIndex) {
+          throw new Error(`Wrangler output did not contain a valid JSON result array: ${stdout}`);
+        }
+        
+        const jsonStr = stdout.substring(jsonStartIndex, jsonEndIndex);
+        const json = JSON.parse(jsonStr);
+        const queryResult = Array.isArray(json) ? json[0] : json;
+        
+        if (!queryResult.success) {
+          throw new Error(queryResult.errors?.[0]?.message || 'Query failed');
+        }
+
+        return {
+          results: queryResult.results || [],
+          success: queryResult.success,
+          meta: queryResult.meta || { changes: 0, duration: 0 }
+        };
+      } finally {
+        // Always clean up the temp file
+        if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
+      }
+    } catch (e: any) {
+      console.error(`\x1b[31m[Wrangler Error]\x1b[0m ${e.message}`);
+      throw e;
+    }
+  }
+
+  prepare(sql: string) {
+    const self = this;
+    const bindings: unknown[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stmt: any = {
+      bind(...args: unknown[]) { bindings.push(...args); return stmt; },
+      async first<T = unknown>(col?: string): Promise<T | null> {
+        const r = await self.query(sql, bindings);
+        const row = r.results?.[0];
+        return col ? (row?.[col] ?? null) : (row ?? null);
+      },
+      async run() {
+        const r = await self.query(sql, bindings);
+        return { results: r.results ?? [], success: true, meta: r.meta ?? {} };
+      },
+      async all<T = unknown>() {
+        const r = await self.query(sql, bindings);
+        return { results: (r.results ?? []) as T[], success: true, meta: r.meta ?? {} };
+      },
+      async raw<T extends unknown[] = unknown[]>() {
+        const r = await self.query(sql, bindings);
+        return (r.results ?? []) as T[];
+      },
+    };
+    return stmt as D1PreparedStatement;
+  }
+
+  async batch<T extends D1Result = D1Result>(statements: D1PreparedStatement[]): Promise<T[]> {
+    const results = await Promise.all(statements.map((s) => (s as any).run()));
+    return results as T[];
+  }
+
+  async exec(query: string): Promise<D1ExecResult> {
+    const r = await this.query(query);
+    return { count: r.meta?.changes ?? 0, duration: r.meta?.duration ?? 0 };
+  }
+
+  async dump(): Promise<ArrayBuffer> {
+    throw new Error('WranglerD1Client.dump() is not supported');
+  }
+}
+
 class D1HttpClient implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'dump'> {
   constructor(
     private accountId: string,
@@ -15,6 +143,9 @@ class D1HttpClient implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'd
 
   private async query(sql: string, params: unknown[] = []) {
     const url = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/d1/database/${this.databaseId}/query`;
+    console.log(`\x1b[36m[D1]\x1b[0m ${sql.slice(0, 120)}`);
+    if (params.length > 0) console.log(`\x1b[36m[D1 params]\x1b[0m`, JSON.stringify(params));
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -23,16 +154,43 @@ class D1HttpClient implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'd
       },
       body: JSON.stringify({ sql, params }),
     });
+
     const json = await res.json() as any;
-    if (!json.success) throw new Error(`D1 HTTP error: ${JSON.stringify(json.errors)}`);
-    return json.result[0];
+
+    if (!json.success) {
+      const errorMsg = json.errors?.[0]?.message || JSON.stringify(json.errors);
+      console.error(`\x1b[31m[D1 Error]\x1b[0m`, errorMsg);
+      throw new Error(`D1 HTTP error: ${errorMsg}`);
+    }
+
+    const resultSet = json.result?.[0];
+    if (!resultSet) {
+      console.error(`\x1b[31m[D1 Error]\x1b[0m No result set. Full response:`, JSON.stringify(json));
+      throw new Error('D1: no result set in response');
+    }
+
+    // Log first row so we can verify column names from D1
+    if (resultSet.results?.length > 0) {
+      const firstRow = resultSet.results[0];
+      console.log(`\x1b[32m[D1 row0]\x1b[0m keys=${Object.keys(firstRow).join(',')}`); 
+      console.log(`\x1b[32m[D1 row0]\x1b[0m`, JSON.stringify(firstRow));
+    } else {
+      console.log(`\x1b[33m[D1 result]\x1b[0m rows=${resultSet.results?.length ?? 'null'} success=${resultSet.success}`);
+    }
+
+    return resultSet;
   }
 
   prepare(sql: string) {
     const self = this;
-    const bindings: unknown[] = [];
-    const stmt: D1PreparedStatement = {
-      bind(...args: unknown[]) { bindings.push(...args); return stmt; },
+    // Each prepare() call gets its own bindings array
+    let bindings: unknown[] = [];
+    const stmt: any = {
+      bind(...args: unknown[]) {
+        // Drizzle calls bind() with all params at once — replace, don't accumulate
+        bindings = args;
+        return stmt;
+      },
       async first<T = unknown>(col?: string): Promise<T | null> {
         const r = await self.query(sql, bindings);
         const row = r.results?.[0];
@@ -40,18 +198,18 @@ class D1HttpClient implements Pick<D1Database, 'prepare' | 'batch' | 'exec' | 'd
       },
       async run() {
         const r = await self.query(sql, bindings);
-        return { results: r.results ?? [], success: true, meta: r.meta ?? {} } as D1Result;
+        return { results: r.results ?? [], success: true, meta: r.meta ?? {} };
       },
       async all<T = unknown>() {
         const r = await self.query(sql, bindings);
-        return { results: (r.results ?? []) as T[], success: true, meta: r.meta ?? {} } as D1Result<T>;
+        return { results: (r.results ?? []) as T[], success: true, meta: r.meta ?? {} };
       },
       async raw<T extends unknown[] = unknown[]>() {
         const r = await self.query(sql, bindings);
         return (r.results ?? []) as T[];
       },
     };
-    return stmt;
+    return stmt as D1PreparedStatement;
   }
 
   async batch<T extends D1Result = D1Result>(statements: D1PreparedStatement[]): Promise<T[]> {
@@ -80,27 +238,34 @@ export function getDb(binding?: D1Database) {
   if (binding) return drizzle(binding, { schema });
 
   // Try CF Pages runtime context (production & next-on-pages)
-  try {
-    // Use variable to prevent Next.js static analysis from erroring on optional package
-    const pkg = '@cloudflare/next-on-pages';
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getRequestContext } = require(pkg);
-    const env = getRequestContext().env;
-    if (env?.DB) return drizzle(env.DB as D1Database, { schema });
-  } catch {
-    // Not in CF Pages runtime — fall through to HTTP driver
+  if (process.env.NODE_ENV !== 'development') {
+    try {
+      // Use a more dynamic way to avoid Turbopack static analysis errors
+      const pkgName = '@cloudflare/next-on-pages';
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getRequestContext } = require(pkgName);
+      const env = getRequestContext()?.env;
+      if (env?.DB) return drizzle(env.DB as D1Database, { schema });
+    } catch {
+      // fall through
+    }
   }
 
-  // Local next dev: use D1 REST API
+  // Local next dev: prefer D1 REST API for speed and reliability
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const databaseId = process.env.CLOUDFLARE_DATABASE_ID;
   const token = process.env.CLOUDFLARE_D1_TOKEN;
+  const databaseName = process.env.CLOUDFLARE_DATABASE_NAME || 'tedxiceas-db';
+
+  // Only use Wrangler if explicitly requested
+  if (process.env.USE_WRANGLER === 'true') {
+    return drizzle(new WranglerD1Client(databaseName) as unknown as D1Database, { schema });
+  }
 
   if (!accountId || !databaseId || !token || token === 'your_d1_api_token_here') {
     throw new Error(
       'CLOUDFLARE_D1_TOKEN is not set. Generate one at:\n' +
-      'https://dash.cloudflare.com/profile/api-tokens\n' +
-      'Use the "D1 Edit" template and paste it into your .env file.'
+      'https://dash.cloudflare.com/profile/api-tokens'
     );
   }
 
@@ -112,14 +277,16 @@ export function getDb(binding?: D1Database) {
  * Only available on Cloudflare Pages; throws a clear error in local dev.
  */
 export function getR2(): R2Bucket {
-  try {
-    const pkg = '@cloudflare/next-on-pages';
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getRequestContext } = require(pkg);
-    const env = getRequestContext().env;
-    if (env?.R2) return env.R2 as R2Bucket;
-  } catch {
-    // fall through
+  if (process.env.NODE_ENV !== 'development') {
+    try {
+      const pkgName = '@cloudflare/next-on-pages';
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getRequestContext } = require(pkgName);
+      const env = getRequestContext()?.env;
+      if (env?.R2) return env.R2 as R2Bucket;
+    } catch {
+      // fall through
+    }
   }
   throw new Error(
     'R2 binding is only available on Cloudflare Pages. Image uploads require a CF Pages deployment.'

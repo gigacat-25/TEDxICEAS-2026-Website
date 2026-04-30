@@ -8,6 +8,7 @@ pages_build_output_dir = ".vercel/output/static"
 binding = "DB"
 database_name = "tedxiceas-db"
 database_id = "e8911620-331c-4a0c-907f-d133c07e0a3e"
+migrations_dir = "drizzle"
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "tedx-iceas-2026-media"

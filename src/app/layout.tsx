@@ -21,7 +21,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+      <html lang="en" className={`${inter.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
         <body className="bg-[#0d0d0d] text-[#f0f0f0] antialiased overflow-x-hidden">
           <div className="relative z-10">
             {children}

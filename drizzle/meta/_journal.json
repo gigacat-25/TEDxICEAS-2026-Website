@@ -8,6 +8,20 @@
       "when": 1777485707013,
       "tag": "0000_dazzling_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1777566444354,
+      "tag": "0001_nervous_omega_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777567716372,
+      "tag": "0002_sour_overlord",
+      "breakpoints": true
     }
   ]
 }

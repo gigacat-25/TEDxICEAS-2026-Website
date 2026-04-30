@@ -1,6 +1,7 @@
-import { UserButton, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Users, Presentation, Handshake, LayoutDashboard, Ticket } from "lucide-react";
+import { Users, Presentation, Handshake, LayoutDashboard, Ticket, CalendarDays, LogOut } from "lucide-react";
 import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 
@@ -35,6 +36,10 @@ export default async function AdminLayout({
             <Ticket className="w-5 h-5" />
             <span>Tickets</span>
           </Link>
+          <Link href="/admin/schedule" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors">
+            <CalendarDays className="w-5 h-5" />
+            <span>Schedule</span>
+          </Link>
           <Link href="/admin/speakers" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors">
             <Presentation className="w-5 h-5" />
             <span>Speakers</span>
@@ -48,6 +53,13 @@ export default async function AdminLayout({
             <span>Sponsors</span>
           </Link>
         </nav>
+
+        <div className="pt-6 border-t border-white/10">
+          <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-ted-red/10 hover:text-ted-red transition-colors group">
+            <LogOut className="w-5 h-5 text-white/40 group-hover:text-ted-red" />
+            <span className="font-bold uppercase tracking-widest text-[0.7rem]">Exit Admin</span>
+          </Link>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -60,7 +72,7 @@ export default async function AdminLayout({
               Authenticated
             </span>
           </div>
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
         </header>
 
         {/* Page Content */}

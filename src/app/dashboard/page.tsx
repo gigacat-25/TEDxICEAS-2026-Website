@@ -3,7 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ticket, Calendar, MapPin, User } from "lucide-react";
+import { Ticket, Calendar, MapPin, User, ShieldAlert } from "lucide-react";
+import { isAdmin } from "@/lib/admin";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -12,6 +14,8 @@ export default async function DashboardPage() {
   }
 
   const tickets = await getUserTickets();
+  const email = user.emailAddresses[0].emailAddress;
+  const userIsAdmin = isAdmin(email);
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white">
@@ -46,6 +50,16 @@ export default async function DashboardPage() {
                   <p className="text-[0.6rem] uppercase text-white/40 tracking-widest font-bold">Email</p>
                   <p className="font-medium truncate">{user.emailAddresses[0].emailAddress}</p>
                 </div>
+                {userIsAdmin && (
+                  <div className="pt-4 mt-4 border-t border-white/10">
+                    <Link href="/admin">
+                      <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-ted-red text-white text-xs font-bold uppercase tracking-widest rounded-md hover:bg-white hover:text-ted-red transition-colors">
+                        <ShieldAlert className="w-4 h-4" />
+                        Go to Admin Panel
+                      </button>
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -91,14 +105,24 @@ export default async function DashboardPage() {
                     <p className="text-white/60 font-light">You don't have any tickets yet.</p>
                     <p className="text-sm text-white/40">Threads of Change is waiting for you.</p>
                   </div>
+                <div className="flex flex-col md:flex-row gap-4 justify-center">
                   <form action={async () => {
                     "use server";
-                    await bookTicket("General");
+                    await bookTicket("student");
                   }}>
-                    <button className="px-8 py-3 bg-white text-ted-red font-black uppercase tracking-widest text-xs hover:scale-105 transition-all">
-                      Book General Ticket Now
+                    <button className="w-full md:w-auto px-8 py-3 bg-ted-red text-white font-black uppercase tracking-widest text-xs hover:scale-105 transition-all border border-ted-red">
+                      Book Student Pass — ₹400
                     </button>
                   </form>
+                  <form action={async () => {
+                    "use server";
+                    await bookTicket("general");
+                  }}>
+                    <button className="w-full md:w-auto px-8 py-3 bg-white text-ted-red font-black uppercase tracking-widest text-xs hover:scale-105 transition-all border border-white">
+                      Book General Pass — ₹500
+                    </button>
+                  </form>
+                </div>
                 </Card>
               )}
             </div>

@@ -1,33 +1,34 @@
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { getSponsors } from "@/app/actions/sponsors";
 
-const sponsorTiers = [
-  {
-    name: "Platinum",
-    sponsors: [
-      { name: "Global Tech", logo: "https://via.placeholder.com/200x100/111/fff?text=Global+Tech" },
-      { name: "Future Systems", logo: "https://via.placeholder.com/200x100/111/fff?text=Future+Systems" }
-    ]
-  },
-  {
-    name: "Gold",
-    sponsors: [
-      { name: "Innovate AI", logo: "https://via.placeholder.com/150x75/111/fff?text=Innovate+AI" },
-      { name: "Eco Solutions", logo: "https://via.placeholder.com/150x75/111/fff?text=Eco+Solutions" },
-      { name: "Next Gen", logo: "https://via.placeholder.com/150x75/111/fff?text=Next+Gen" }
-    ]
-  },
-  {
-    name: "Silver",
-    sponsors: [
-      { name: "Media Partner", logo: "https://via.placeholder.com/120x60/111/fff?text=Media+Partner" },
-      { name: "Tech Weekly", logo: "https://via.placeholder.com/120x60/111/fff?text=Tech+Weekly" },
-      { name: "Community Hub", logo: "https://via.placeholder.com/120x60/111/fff?text=Community+Hub" },
-      { name: "Digital First", logo: "https://via.placeholder.com/120x60/111/fff?text=Digital+First" }
-    ]
+export default async function SponsorsPage() {
+  let sponsors: any[] = [];
+  try {
+    sponsors = await getSponsors();
+  } catch (error) {
+    console.error("Failed to fetch sponsors:", error);
   }
-];
 
-export default function SponsorsPage() {
+  // Group sponsors by tier
+  const tiers = sponsors.reduce((acc: any, sponsor) => {
+    const tier = sponsor.tier || "General";
+    if (!acc[tier]) acc[tier] = [];
+    acc[tier].push(sponsor);
+    return acc;
+  }, {});
+
+  // Order tiers: Platinum, Gold, Silver, Bronze, etc.
+  const tierOrder = ["platinum", "gold", "silver", "bronze", "partner", "general"];
+  const sortedTiers = Object.keys(tiers).sort((a, b) => {
+    const indexA = tierOrder.indexOf(a.toLowerCase());
+    const indexB = tierOrder.indexOf(b.toLowerCase());
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
   return (
     <main className="min-h-screen bg-transparent text-white">
       <Navbar />
@@ -44,25 +45,31 @@ export default function SponsorsPage() {
           </div>
 
           <div className="space-y-32">
-            {sponsorTiers.map((tier, i) => (
-              <div key={i} className="text-center">
-                <h2 className="text-2xl font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">{tier.name} Partners</h2>
-                <div className="flex flex-wrap justify-center gap-12 md:gap-20">
-                  {tier.sponsors.map((sponsor, j) => (
-                    <div key={j} className="group relative w-48 md:w-64">
-                      <div className="aspect-[2/1] bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center p-8 group-hover:border-[#E62B1E]/50 group-hover:bg-white/10 transition-all duration-500">
-                        <img 
-                          src={sponsor.logo} 
-                          alt={sponsor.name}
-                          className="w-full h-auto opacity-50 group-hover:opacity-100 transition-opacity duration-500 filter invert grayscale"
-                        />
-                      </div>
-                      <p className="mt-4 text-sm text-gray-500 group-hover:text-white transition-colors">{sponsor.name}</p>
-                    </div>
-                  ))}
-                </div>
+            {sponsors.length === 0 ? (
+              <div className="text-center py-20 text-white/20">
+                Partner lineup coming soon.
               </div>
-            ))}
+            ) : (
+              sortedTiers.map((tierName, i) => (
+                <div key={i} className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-500 uppercase tracking-[0.3em] mb-12">{tierName} Partners</h2>
+                  <div className="flex flex-wrap justify-center gap-12 md:gap-20">
+                    {tiers[tierName].map((sponsor: any, j: number) => (
+                      <div key={j} className="group relative w-48 md:w-64">
+                        <div className="aspect-[2/1] bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center p-8 group-hover:border-[#E62B1E]/50 group-hover:bg-white/10 transition-all duration-500">
+                          <img 
+                            src={sponsor.logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${sponsor.name}`} 
+                            alt={sponsor.name}
+                            className="w-full h-auto opacity-50 group-hover:opacity-100 transition-opacity duration-500 filter invert grayscale group-hover:grayscale-0 group-hover:invert-0"
+                          />
+                        </div>
+                        <p className="mt-4 text-sm text-gray-500 group-hover:text-white transition-colors">{sponsor.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -85,10 +92,7 @@ export default function SponsorsPage() {
           </div>
         </div>
       </section>
-
-      <footer className="py-20 px-6 text-center text-gray-500">
-        <p>© 2026 TEDxICEAS. This independent TEDx event is operated under license from TED.</p>
-      </footer>
+      <Footer />
     </main>
   );
 }

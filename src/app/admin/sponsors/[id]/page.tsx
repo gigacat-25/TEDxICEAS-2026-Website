@@ -47,7 +47,7 @@ export default function EditSponsorPage() {
         uploadFormData.append("file", selectedFile);
         const res = await fetch("/api/upload", { method: "POST", body: uploadFormData });
         if (!res.ok) throw new Error("Upload failed");
-        const { url } = await res.json();
+        const { url } = await res.json() as { url: string };
         logoUrl = url;
       }
       await updateSponsor(id, { ...form, ...(logoUrl ? { logoUrl } : {}) });

@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function AboutPage() {
   return (
@@ -30,18 +31,36 @@ export default function AboutPage() {
               allowFullScreen
             ></iframe>
           </div>
-          <div className="mt-12 grid md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">What is TED?</h2>
-              <p className="text-gray-400 leading-relaxed">
-                TED is a nonprofit organization devoted to Ideas Worth Spreading, usually in the form of short, powerful talks delivered by today's leading thinkers and doers. Many of these talks are given at TED's annual conference in Vancouver, British Columbia, and made available, free, at TED.com.
-              </p>
+          <div className="mt-20 space-y-20">
+            <div className="grid md:grid-cols-2 gap-12">
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold uppercase italic tracking-tighter">About TEDx, x = independently organized event</h2>
+                <p className="text-gray-400 leading-relaxed text-lg">
+                  In the spirit of discovering and spreading ideas, TEDx is a program of local, self-organized events that bring people together to share a TED-like experience. At a TEDx event, TED Talks video and live speakers combine to spark deep discussion and connection. These local, self-organized events are branded TEDx, where x = independently organized TED event. The TED Conference provides general guidance for the TEDx program, but individual TEDx events are self-organized. (Subject to certain rules and regulations.)
+                </p>
+              </div>
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold uppercase italic tracking-tighter">About TED</h2>
+                <p className="text-gray-400 leading-relaxed text-lg">
+                  TED is a nonprofit, nonpartisan organization dedicated to discovering, debating and spreading ideas that spark conversation, deepen understanding and drive meaningful change. Our organization is devoted to curiosity, reason, wonder and the pursuit of knowledge — without an agenda. We welcome people from every discipline and culture who seek a deeper understanding of the world and connection with others, and we invite everyone to engage with ideas and activate them in your community.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-3xl font-bold mb-6">What is TEDx?</h2>
+
+            <div className="max-w-4xl mx-auto space-y-8 bg-white/5 p-12 rounded-3xl border border-white/10">
               <p className="text-gray-400 leading-relaxed">
-                In the spirit of ideas worth spreading, TEDx is a program of local, self-organized events that bring people together to share a TED-like experience. At a TEDx event, TED Talks video and live speakers combine to spark deep discussion and connection.
+                TED began in 1984 as a conference where Technology, Entertainment and Design converged, but today it spans a multitude of worldwide communities and initiatives exploring everything from science and business to education, arts and global issues. In addition to the TED Talks curated from our annual conferences and published on TED.com, we produce original podcasts, short video series, animated educational lessons (TED-Ed) and TV programs that are translated into more than 100 languages and distributed via partnerships around the world. Each year, thousands of independently run TEDx events. Through the Audacious Project, TED has helped catalyze $6.6 billion in funding for projects that support bold solutions to the world's most urgent challenges — working to make the world more beautiful, sustainable and just. In 2020, TED launched Countdown, an initiative to accelerate solutions to the climate crisis and mobilize a movement for a net-zero future, and in 2023 TED launched TED Democracy to spark a new kind of conversation focused on realistic pathways towards a more vibrant and equitable future. 
               </p>
+              <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex gap-4">
+                  {['Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'X'].map((platform) => (
+                    <a key={platform} href="#" className="text-xs uppercase tracking-widest font-bold hover:text-[#E62B1E] transition-colors">{platform}</a>
+                  ))}
+                </div>
+                <a href="https://www.ted.com" target="_blank" rel="noopener noreferrer" className="text-xs uppercase tracking-widest font-bold text-[#E62B1E] hover:text-white transition-colors">
+                  View a full list of TED’s many programs →
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -74,10 +93,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-20 px-6 border-t border-white/10 text-center text-gray-500">
-        <p>© 2026 TEDxICEAS. This independent TEDx event is operated under license from TED.</p>
-      </footer>
+      <Footer />
     </main>
   );
 }

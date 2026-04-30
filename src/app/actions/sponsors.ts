@@ -1,10 +1,42 @@
 "use server";
 
-import { getDb } from "@/db";
-import { sponsors } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { d1, d1run } from "@/lib/d1";
 import { v4 as uuidv4 } from "uuid";
 import { revalidatePath } from "next/cache";
+import { isAdmin } from "@/lib/admin";
+import { currentUser } from "@clerk/nextjs/server";
+
+interface Sponsor {
+  id: string;
+  name: string;
+  tier: string;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  displayOrder: number;
+}
+
+export async function getSponsors(): Promise<Sponsor[]> {
+  return d1<Sponsor>(`
+    SELECT id, name, tier,
+           logo_url      AS logoUrl,
+           website_url   AS websiteUrl,
+           display_order AS displayOrder
+    FROM sponsors
+    ORDER BY display_order ASC
+  `);
+}
+
+export async function getSponsorById(id: string): Promise<Sponsor | null> {
+  const rows = await d1<Sponsor>(
+    `SELECT id, name, tier,
+            logo_url      AS logoUrl,
+            website_url   AS websiteUrl,
+            display_order AS displayOrder
+     FROM sponsors WHERE id = ?`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
 
 export async function createSponsor(data: {
   name: string;
@@ -12,65 +44,57 @@ export async function createSponsor(data: {
   logoUrl?: string;
   websiteUrl?: string;
 }) {
-  const db = getDb();
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
+
+  const rows = await d1<{ maxOrder: number }>(
+    `SELECT COALESCE(MAX(display_order), -1) AS maxOrder FROM sponsors`
+  );
+  const maxOrder = rows[0]?.maxOrder ?? -1;
+
   const id = uuidv4();
-
-  // Get current max order
-  const allSponsors = await db.select().from(sponsors);
-  const maxOrder = allSponsors.reduce((max, s) => Math.max(max, s.displayOrder || 0), -1);
-
-  await db.insert(sponsors).values({
-    id,
-    name: data.name,
-    tier: data.tier,
-    logoUrl: data.logoUrl,
-    websiteUrl: data.websiteUrl,
-    displayOrder: maxOrder + 1,
-  });
+  await d1run(
+    `INSERT INTO sponsors (id, name, tier, logo_url, website_url, display_order, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.name, data.tier, data.logoUrl ?? null, data.websiteUrl ?? null, maxOrder + 1, Date.now()]
+  );
 
   revalidatePath("/admin/sponsors");
+  revalidatePath("/sponsors");
   revalidatePath("/");
   return { success: true, id };
 }
 
+export async function updateSponsor(
+  id: string,
+  data: { name: string; tier: string; logoUrl?: string; websiteUrl?: string; displayOrder?: number }
+) {
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
+
+  await d1run(
+    `UPDATE sponsors
+     SET name = ?, tier = ?, website_url = ?,
+         logo_url = COALESCE(?, logo_url),
+         display_order = COALESCE(?, display_order)
+     WHERE id = ?`,
+    [data.name, data.tier, data.websiteUrl ?? null, data.logoUrl ?? null, data.displayOrder ?? null, id]
+  );
+
+  revalidatePath("/admin/sponsors");
+  revalidatePath("/sponsors");
+  revalidatePath("/");
+  return { success: true };
+}
+
 export async function deleteSponsor(id: string) {
-  const db = getDb();
-  await db.delete(sponsors).where(eq(sponsors.id, id));
-  
+  const user = await currentUser();
+  if (!isAdmin(user?.emailAddresses[0]?.emailAddress)) throw new Error("Unauthorized");
+
+  await d1run(`DELETE FROM sponsors WHERE id = ?`, [id]);
+
   revalidatePath("/admin/sponsors");
+  revalidatePath("/sponsors");
   revalidatePath("/");
   return { success: true };
 }
-
-export async function getSponsors() {
-  const db = getDb();
-  return await db.select().from(sponsors).orderBy(sponsors.displayOrder);
-}
-
-export async function getSponsorById(id: string) {
-  const db = getDb();
-  const result = await db.select().from(sponsors).where(eq(sponsors.id, id));
-  return result[0] || null;
-}
-
-export async function updateSponsor(id: string, data: {
-  name: string;
-  tier: string;
-  logoUrl?: string;
-  websiteUrl?: string;
-  displayOrder?: number;
-}) {
-  const db = getDb();
-  await db.update(sponsors).set({
-    name: data.name,
-    tier: data.tier as any,
-    websiteUrl: data.websiteUrl,
-    ...(data.logoUrl ? { logoUrl: data.logoUrl } : {}),
-    ...(data.displayOrder !== undefined ? { displayOrder: data.displayOrder } : {}),
-  }).where(eq(sponsors.id, id));
-
-  revalidatePath("/admin/sponsors");
-  revalidatePath("/");
-  return { success: true };
-}
-

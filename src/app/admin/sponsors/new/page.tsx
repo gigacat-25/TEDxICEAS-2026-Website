@@ -32,7 +32,7 @@ export default function NewSponsorPage() {
 
       if (!response.ok) throw new Error("Upload failed");
 
-      const data = await response.json();
+      const data = await response.json() as { url: string };
       setImageUrl(data.url);
     } catch (error) {
       console.error("Upload error:", error);

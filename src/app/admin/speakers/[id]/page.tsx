@@ -45,7 +45,7 @@ export default function EditSpeakerPage() {
         uploadFormData.append("file", selectedFile);
         const res = await fetch("/api/upload", { method: "POST", body: uploadFormData });
         if (!res.ok) throw new Error("Upload failed");
-        const { url } = await res.json();
+        const { url } = await res.json() as { url: string };
         imageUrl = url;
       }
       await updateSpeaker(id, { ...form, ...(imageUrl ? { imageUrl } : {}) });
